@@ -31,7 +31,10 @@ const HeaderButton = ({ href, children }: HeaderButtonProps) => {
 
   return (
     <div className="flex flex-col relative justify-center group">
-      <Link className={`${selectedRoute ? "font-bold" : ""}`} href={href}>
+      <Link
+        className={`${selectedRoute ? "font-bold" : ""} h-full`}
+        href={href}
+      >
         {children}
       </Link>
       <div

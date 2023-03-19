@@ -7,6 +7,8 @@ import { useAccount } from "wagmi";
 import { ConnectKitButton } from "connectkit";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { Input } from "components/input";
+import { TitleBarTabs } from "components/title-bar-tabs";
 
 export default function Home() {
   const { address, isConnecting, isDisconnected } = useAccount();
@@ -15,16 +17,13 @@ export default function Home() {
   return (
     <div>
       <main>
-        <h2>Explore</h2>
+        <h1 className="my-8 text-center">Explore Moonboards</h1>
 
-        <div>
-          <input placeholder="Search" />
-          <button>All</button>
-          <button>Moonpins</button>
-          <button>Moonboards</button>
+        <div className="flex items-center gap-4 h-10">
+          <Input placeholder="Search" className="w-72" />
+          <TitleBarTabs />
         </div>
       </main>
-      <div>Connected Wallet: {address}</div>
     </div>
   );
 }

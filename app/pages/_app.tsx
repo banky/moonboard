@@ -1,4 +1,4 @@
-import "@/styles/globals.css";
+import "styles/globals.css";
 import { WagmiConfig, createClient } from "wagmi";
 import {
   ConnectKitProvider,
@@ -23,7 +23,9 @@ const App = ({ Component, pageProps }: AppProps) => {
     <WagmiConfig client={client}>
       <ConnectKitProvider>
         <Header />
-        <Component {...pageProps} />
+        <div className="mx-8">
+          <Component {...pageProps} />
+        </div>
       </ConnectKitProvider>
     </WagmiConfig>
   );
