@@ -1,25 +1,24 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { Button } from "./button";
 
-export const TitleBarTabs = () => {
-  return (
-    <div className="flex gap-4 h-full">
-      <Tab filter="all">All</Tab>
-      <Tab filter="moonpins">Moonpins</Tab>
-      <Tab filter="moonboards">Moonboards</Tab>
-    </div>
-  );
+type TitleBarTabsProps = {
+  children: React.ReactNode;
+};
+export const TitleBarTabs = ({ children }: TitleBarTabsProps) => {
+  return <div className="flex gap-4 h-full">{children}</div>;
 };
 
 type TabProps = {
   filter: string;
   children: React.ReactNode;
+  isDefault?: boolean;
 };
 
-const Tab = ({ filter, children }: TabProps) => {
+export const Tab = ({ filter, children, isDefault = false }: TabProps) => {
   const { query } = useRouter();
   const isActive =
-    query.filter === filter || (!query.filter && filter === "all");
+    query.filter === filter || (query.filter === undefined && isDefault);
 
   return (
     <div className="flex flex-col relative justify-center group min-w-[50px]">

@@ -27,14 +27,12 @@ type HeaderButtonProps = {
 
 const HeaderButton = ({ href, children }: HeaderButtonProps) => {
   const { pathname } = useRouter();
-  const selectedRoute = pathname === href;
+  const selectedRoute =
+    pathname === href || (href !== "/" && pathname.startsWith(href));
 
   return (
     <div className="flex flex-col relative justify-center group">
-      <Link
-        className={`${selectedRoute ? "font-bold" : ""} h-full`}
-        href={href}
-      >
+      <Link className={`${selectedRoute ? "font-bold" : ""}`} href={href}>
         {children}
       </Link>
       <div
