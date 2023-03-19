@@ -9,7 +9,13 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        blue: "hsla(217, 91%, 60%, 1)",
+        green: "hsla(142, 69%, 58%, 1)",
+        background: "hsla(0, 0%, 96%, 1)",
+      },
+    },
   },
   plugins: [],
 };
