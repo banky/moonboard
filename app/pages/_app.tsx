@@ -8,13 +8,15 @@ import {
 import { AppProps } from "next/app";
 import dynamic from "next/dynamic";
 import { Header } from "components/header";
+import { mainnet, hardhat, goerli } from "wagmi/chains";
 
 const alchemyId = process.env.ALCHEMY_ID;
 
 const client = createClient(
   getDefaultClient({
     appName: "Moonboard",
-    alchemyId: "pLxXshVDXE8WjhP-K5EvYX-991FaaJWK",
+    // alchemyId: "pLxXshVDXE8WjhP-K5EvYX-991FaaJWK",
+    chains: [hardhat],
   })
 );
 
