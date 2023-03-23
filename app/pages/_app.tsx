@@ -9,8 +9,10 @@ import { AppProps } from "next/app";
 import dynamic from "next/dynamic";
 import { Header } from "components/header";
 import { mainnet, hardhat, goerli } from "wagmi/chains";
+import { Montserrat } from "next/font/google";
 
 const alchemyId = process.env.ALCHEMY_ID;
+const montserrat = Montserrat({ subsets: ["latin"] });
 
 const client = createClient(
   getDefaultClient({
@@ -24,9 +26,11 @@ const App = ({ Component, pageProps }: AppProps) => {
   return (
     <WagmiConfig client={client}>
       <ConnectKitProvider>
-        <Header />
-        <div className="mx-8">
-          <Component {...pageProps} />
+        <div className={montserrat.className}>
+          <Header />
+          <div className="mx-8">
+            <Component {...pageProps} />
+          </div>
         </div>
       </ConnectKitProvider>
     </WagmiConfig>

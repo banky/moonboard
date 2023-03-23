@@ -1,6 +1,7 @@
 import { Button } from "components/button";
 import { Input } from "components/input";
 import { MoonpinABI } from "contracts";
+import { NFTStorage } from "nft.storage";
 import { useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi";
@@ -8,8 +9,14 @@ import { Web3Storage } from "web3.storage";
 
 const fileTypes = ["JPG", "PNG", "GIF"];
 
+const API_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDZhMTVjRmM5MDM0YzBFZWI1ZTM1QTdkMzc0NGQ1NjJjNmViYmUzZjciLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY3OTYwNDgxNzM5NywibmFtZSI6Im1vb25ib2FyZCJ9.34zWVl61_Hz7X_VFpZCwv0wYKKIA1fvTUHsTrN_GpA8";
 const web3StorageClient = new Web3Storage({
   token: process.env.NEXT_PUBLIC_WEB3_STORAGE_TOKEN ?? "",
+});
+
+const nftStorageClient = new NFTStorage({
+  token: API_KEY,
 });
 
 export default function CreateMoonpin() {
@@ -36,10 +43,17 @@ export default function CreateMoonpin() {
     if (file == null) {
       return;
     }
-    const cid = await web3StorageClient.put([file]);
+    // const cid = await web3StorageClient.put([file]);
+    const metadata = await nftStorageClient.store({
+      name: "test moonpin",
+      description: "This is a test",
+      image: file,
+    });
 
-    const sendTransactionResult = await onMint?.();
-    await sendTransactionResult?.wait();
+    console.log(metadata);
+
+    // const sendTransactionResult = await onMint?.();
+    // await sendTransactionResult?.wait();
   };
 
   return (

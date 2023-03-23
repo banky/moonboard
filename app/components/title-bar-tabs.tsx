@@ -6,7 +6,9 @@ type TitleBarTabsProps = {
   children: React.ReactNode;
 };
 export const TitleBarTabs = ({ children }: TitleBarTabsProps) => {
-  return <div className="flex gap-4 h-full">{children}</div>;
+  return (
+    <div className="flex border-2 rounded-md border-outlines">{children}</div>
+  );
 };
 
 type TabProps = {
@@ -21,20 +23,13 @@ export const Tab = ({ filter, children, isDefault = false }: TabProps) => {
     query.filter === filter || (query.filter === undefined && isDefault);
 
   return (
-    <div className="flex flex-col relative justify-center group min-w-[50px]">
-      <Link
-        className={`h-full flex items-center mx-auto ${
-          isActive ? "font-bold" : ""
-        }`}
-        href={`?filter=${filter}`}
-      >
+    <div
+      className={`overflow-clip border-r-2 border-r-outlines last:border-r-0 px-4 py-2 
+    ${isActive ? "bg-secondary-brand" : ""}`}
+    >
+      <Link className={`mx-auto`} href={`?filter=${filter}`}>
         {children}
       </Link>
-      <div
-        className={`h-0.5 bottom-0 left-0 right-0 absolute ${
-          isActive ? "bg-blue" : ""
-        } group-hover:bg-green`}
-      />
     </div>
   );
 };
