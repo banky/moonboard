@@ -5,9 +5,10 @@ import { Button } from "components/button";
 import { Star } from "svg/star";
 import { useState } from "react";
 import { Modal } from "components/modal";
-import { CloseButton } from "components/close-button";
+import { IconButton } from "components/close-button";
 import { ModalOption } from "components/modal-option";
 import Link from "next/link";
+import { Close } from "svg/close";
 
 export default function Home() {
   const { address, isConnecting, isDisconnected } = useAccount();
@@ -50,13 +51,15 @@ export default function Home() {
         <div className="m-4">
           <div className="flex justify-between">
             <div>
-              <h1 className="text-lg">Create Moonboard</h1>
+              <h3>Create Moonboard</h3>
               <p className="">
                 Choose what content you want to put into your board
               </p>
             </div>
 
-            <CloseButton className="" onClick={close} />
+            <IconButton className="" onClick={close}>
+              <Close />
+            </IconButton>
           </div>
 
           <div className="h-0.5 -mx-4 bg-outlines my-4" />
