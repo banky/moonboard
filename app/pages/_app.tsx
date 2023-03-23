@@ -1,3 +1,4 @@
+import "@reach/dialog/styles.css";
 import "styles/globals.css";
 import { WagmiConfig, createClient } from "wagmi";
 import {

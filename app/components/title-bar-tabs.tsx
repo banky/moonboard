@@ -7,7 +7,9 @@ type TitleBarTabsProps = {
 };
 export const TitleBarTabs = ({ children }: TitleBarTabsProps) => {
   return (
-    <div className="flex border-2 rounded-md border-outlines">{children}</div>
+    <div className="flex border-2 rounded-md border-outlines overflow-hidden">
+      {children}
+    </div>
   );
 };
 
@@ -24,7 +26,7 @@ export const Tab = ({ filter, children, isDefault = false }: TabProps) => {
 
   return (
     <div
-      className={`overflow-clip border-r-2 border-r-outlines last:border-r-0 px-4 py-2 
+      className={`border-r-2 border-r-outlines last:border-r-0 px-4 py-2 
     ${isActive ? "bg-secondary-brand" : ""}`}
     >
       <Link className={`mx-auto`} href={`?filter=${filter}`}>

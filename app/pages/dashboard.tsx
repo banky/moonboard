@@ -18,7 +18,7 @@ export default function Dashboard() {
             <Tab filter="settings">Settings</Tab>
           </TitleBarTabs>
         </div>
-        <Link href="/dashboard/create-moonpin">
+        <Link href="/create-moonboard">
           <Button>Create</Button>
         </Link>
       </div>
