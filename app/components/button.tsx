@@ -14,6 +14,9 @@ export const Button = ({ className = "", ...props }: ButtonProps) => {
         border-2 text-white font-bold p-2 px-4 rounded-md
         enabled:hover:bg-accent enabled:hover:text-text-standard 
         enabled:hover:drop-shadow-[5px_5px_0_rgba(30,30,30,1)]
+        enabled:fill-outlines
+        disabled:text-text-low-contrast disabled:border-text-low-contrast
+        disabled:fill-text-low-contrast
         ${className}`}
     />
   );

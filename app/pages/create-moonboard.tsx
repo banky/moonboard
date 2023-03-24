@@ -11,6 +11,8 @@ export default function CreateMoonboard() {
   const [myPictures, setMyPictures] = useState(false);
   const [communityGuidelines, setCommunityGuidelines] = useState(false);
 
+  const submitEnabled = myPictures && communityGuidelines && files.length > 0;
+
   const handleChange = (files: FileList) => {
     setFiles(Array.from(files));
   };
@@ -54,7 +56,7 @@ export default function CreateMoonboard() {
           </div>
 
           <div>
-            <IconButton>
+            <IconButton disabled={!submitEnabled}>
               <Plus />
             </IconButton>
           </div>
