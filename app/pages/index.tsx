@@ -5,7 +5,7 @@ import { Button } from "components/button";
 import { Star } from "svg/star";
 import { useState } from "react";
 import { Modal } from "components/modal";
-import { IconButton } from "components/close-button";
+import { IconButton } from "components/icon-button";
 import { ModalOption } from "components/modal-option";
 import Link from "next/link";
 import { Close } from "svg/close";

@@ -4,7 +4,7 @@ export const IconButton = ({ className = "", ...props }: ButtonProps) => {
   return (
     <Button
       {...props}
-      className={`bg-transparent enabled:hover:bg-secondary-light ${className}`}
+      className={`bg-transparent enabled:hover:bg-secondary-light ${className} min-w-fit`}
     ></Button>
   );
 };

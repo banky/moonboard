@@ -9,6 +9,9 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    fontFamily: {
+      headers: ["Playa", "sans-serif"],
+    },
     extend: {
       colors: {
         blue: "hsla(217, 91%, 60%, 1)",
@@ -24,6 +27,15 @@ module.exports = {
         outlines: "hsla(126, 3%, 10%, 1)",
         accent: "hsla(18, 97%, 64%, 1)",
         "secondary-light": "hsla(150, 67%, 93%, 1)",
+      },
+    },
+    animation: {
+      blink: "blink-keyframe 1s ease-in-out infinite",
+    },
+    keyframes: {
+      "blink-keyframe": {
+        "0%": { visibility: "visible" },
+        "50%": { visibility: "hidden" },
       },
     },
   },
