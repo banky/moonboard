@@ -1,3 +1,4 @@
+import { Checkbox } from "components/checkbox";
 import { IconButton } from "components/close-button";
 import { useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
@@ -7,6 +8,8 @@ const fileTypes = ["JPG", "PNG", "GIF"];
 
 export default function CreateMoonboard() {
   const [files, setFiles] = useState<File[]>([]);
+  const [myPictures, setMyPictures] = useState(false);
+  const [communityGuidelines, setCommunityGuidelines] = useState(false);
 
   const handleChange = (files: FileList) => {
     setFiles(Array.from(files));
@@ -58,29 +61,18 @@ export default function CreateMoonboard() {
         </div>
 
         <div className="w-3/4 mx-auto">
-          <input
+          <Checkbox
             id="my-pictures"
-            type="checkbox"
-            value=""
-            className="appearance-none w-4 h-4 text-blue-600 bg-gray-100 border-2 border-outlines rounded 
-            focus:ring-blue-500 focus:ring-2 checked:bg-slate-200
-            hover:drop-shadow-[5px_5px_0_rgba(30,30,30,1)]"
+            checked={myPictures}
+            label="These pictures are mine"
+            onChange={(e) => setMyPictures(e.target.checked)}
           />
-          <label htmlFor="my-pictures" className="mx-4">
-            These pictures are mine
-          </label>
-          <br />
-          <input
+          <Checkbox
             id="community-guidelines"
-            type="checkbox"
-            value=""
-            className="appearance-none w-4 h-4 text-blue-600 bg-gray-100 border-2 border-outlines rounded 
-            focus:ring-blue-500 focus:ring-2 checked:bg-slate-200
-            hover:drop-shadow-[5px_5px_0_rgba(30,30,30,1)]"
+            checked={communityGuidelines}
+            label="I have read community guidelines"
+            onChange={(e) => setCommunityGuidelines(e.target.checked)}
           />
-          <label htmlFor="community-guidelines" className="mx-4">
-            I have read community guidelines
-          </label>
         </div>
       </div>
     </main>
