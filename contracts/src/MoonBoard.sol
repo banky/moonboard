@@ -1,32 +1,49 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
+import "./MoonPin.sol";
 
 contract MoonBoard {
-    address public creator;
-    string public name;
-    uint public votes;
+    address public moonpinContract;
 
-    struct Moonpin {
-        address token;
-        uint id;
+    struct Board {
+        string name;
+        uint[] moonpinIds;
+        uint votes;
     }
 
-    Moonpin[] public moonpins;
+    mapping(address => Board[]) public moonboards;
 
-    constructor(string memory _name) {
-        creator = msg.sender;
-        name = _name;
+    constructor(address _moonpinContract) {
+        moonpinContract = _moonpinContract;
     }
 
-    function addMoonpin(address _token, uint _id) public {
-        moonpins.push(Moonpin(_token, _id));
+    function vote(address owner, uint index) public {
+        moonboards[owner][index].votes += 1;
     }
 
-    function vote() public {
-        votes++;
+    function createMoonboard(
+        string memory name,
+        string[] memory tokenURIs
+    ) public returns (bool success) {
+        Board memory board = Board({
+            name: name,
+            moonpinIds: new uint[](tokenURIs.length),
+            votes: 0
+        });
+
+        for (uint i = 0; i < tokenURIs.length; i++) {
+            uint tokenId = MoonPin(moonpinContract).createMoonPin(
+                msg.sender,
+                tokenURIs[i]
+            );
+            board.moonpinIds[i] = tokenId;
+        }
+
+        moonboards[msg.sender].push(board);
+        return true;
     }
 
-    function getMoonpins() public view returns (Moonpin[] memory) {
-        return moonpins;
+    function updateMoonboardName(uint index, string memory name) public {
+        moonboards[msg.sender][index].name = name;
     }
 }

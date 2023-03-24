@@ -9,6 +9,10 @@ import { FileUploader } from "react-drag-drop-files";
 import { Plus } from "svg/plus";
 import Masonry from "react-masonry-css";
 import { Check } from "svg/check";
+import { Close } from "svg/close";
+import { PlusCross } from "svg/plus-cross";
+import { MoonBoardABI, MoonpinABI } from "contracts";
+import { useAccount, usePrepareContractWrite, useContractWrite } from "wagmi";
 
 const fileTypes = ["JPG", "JPEG", "PNG", "GIF"];
 
@@ -118,44 +122,106 @@ type PublishProps = {
   files: File[];
   setPageState: (pageState: "upload" | "publish") => void;
 };
+
+type MoonPin = {
+  name: string;
+  imageFile: File;
+  selected: boolean;
+};
+
 const Publish = ({ files, setPageState }: PublishProps) => {
-  const [loading, setLoading] = useState(false);
+  const [loadingState, setLoadingState] = useState<"initial" | "ipfs" | "mint">(
+    "initial"
+  );
+  const [moonPins, setMoonPins] = useState<MoonPin[]>(
+    files.map((file) => ({
+      name: "",
+      imageFile: file,
+      selected: true,
+    }))
+  );
+
+  const contractAddress =
+    process.env.NEXT_PUBLIC_MOONBOARD_CONTRACT_ADDRESS ?? "";
+  const { address } = useAccount();
+
+  const [tokenUris, setTokenUris] = useState<string[]>([]);
+
+  const { config } = usePrepareContractWrite({
+    address: contractAddress as `0x${string}`,
+    abi: MoonBoardABI.abi,
+    functionName: "createMoonboard",
+    args: ["test moonboard", tokenUris],
+    enabled: tokenUris.length > 0,
+  });
+  const { writeAsync: onCreateMoonboard } = useContractWrite(config);
 
   const onSubmit = async () => {
-    setLoading(true);
+    setLoadingState("ipfs");
 
-    const file = files[0];
+    const metadata = await Promise.all(
+      moonPins.map(async (moonPin) => {
+        if (moonPin.selected) {
+          return nftStorageClient.store({
+            name: "test moonpin 2",
+            description: "This is a test",
+            image: moonPin.imageFile,
+          });
+        }
+      })
+    );
+    setTokenUris(metadata.map((token) => token?.url ?? ""));
 
-    const metadata = await nftStorageClient.store({
-      name: "test moonpin 2",
-      description: "This is a test",
-      image: file,
-    });
+    setLoadingState("mint");
 
-    console.log("metadata", metadata);
+    const sendTransactionResult = await onCreateMoonboard?.();
+    await sendTransactionResult?.wait();
 
-    setLoading(false);
+    setLoadingState("initial");
 
     // router.push("/publish-moonboard");
   };
 
+  const loadingStateString = {
+    ipfs: "Uploading to IPFS",
+    mint: "Confirm in wallet...",
+    initial: "Publish Moonboard",
+  }[loadingState];
+
+  console.log("loadingState", loadingState);
+
   return (
     <main>
       <h1 className="m-12 text-center">Publish Moonboard</h1>
-      <div className="flex justify-between my-8">
+      <div className="flex justify-between my-32 max-w-6xl mx-auto">
         <Button onClick={() => setPageState("upload")}>Back</Button>
 
-        <Button onClick={onSubmit} loading={loading}>
-          Publish Moonboard
+        <Button
+          onClick={onSubmit}
+          disabled={!["initial"].includes(loadingState)}
+        >
+          {loadingStateString}
         </Button>
       </div>
 
-      <div className="border-2 border-outlines rounded-md p-4">
+      <div className="max-w-6xl mx-auto">
         <div className="flex justify-between">
-          <p className="font-bold">Your New Created Moonpins</p>
-          <p>
-            {files.length} item{`${files.length > 1 ? "s" : ""}`}
-          </p>
+          <div>
+            <h3 className="font-bold">Your New Moonpins</h3>
+            <p className="inline">
+              Select which ones to keep and unselect which ones to exclude from
+              your board
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <p className="text-outlines">Votes</p>
+            <h3>000</h3>
+            <p className="text-outlines">Pins</p>
+            <h3>000</h3>
+            <p className="text-outlines">Items</p>
+            <h3>000</h3>
+          </div>
         </div>
 
         <Masonry
@@ -163,11 +229,21 @@ const Publish = ({ files, setPageState }: PublishProps) => {
           className="flex w-auto my-8"
           columnClassName="first:pl-0 pl-4"
         >
-          {files.map((file) => (
-            <CreateMoonboardCard
-              key={file.name}
-              image={URL.createObjectURL(file)}
+          {moonPins.map((moonpin) => (
+            <MoonpinCard
+              key={moonpin.imageFile.name}
+              image={URL.createObjectURL(moonpin.imageFile)}
               title=""
+              selected={moonpin.selected}
+              onSelectedChange={(selected: boolean) => {
+                setMoonPins((prev) =>
+                  prev.map((pin) =>
+                    pin.imageFile.name === moonpin.imageFile.name
+                      ? { ...pin, selected }
+                      : pin
+                  )
+                );
+              }}
             />
           ))}
         </Masonry>
@@ -176,12 +252,19 @@ const Publish = ({ files, setPageState }: PublishProps) => {
   );
 };
 
-type CreateMoonboardCardProps = {
+type MoonpinCardProps = {
   image: string;
   title: string;
+  selected: boolean;
+  onSelectedChange: (selected: boolean) => void;
 };
 
-const CreateMoonboardCard = ({ image, title }: CreateMoonboardCardProps) => {
+const MoonpinCard = ({
+  image,
+  title,
+  selected,
+  onSelectedChange,
+}: MoonpinCardProps) => {
   const [enteringTitle, setEnteringTitle] = useState(false);
 
   return (
@@ -195,9 +278,6 @@ const CreateMoonboardCard = ({ image, title }: CreateMoonboardCardProps) => {
         />
         {!enteringTitle ? (
           <div className="flex items-center">
-            {/* <h1 className="text-lg text-primary-brand relative pointer-events-none px-2 w-fit">
-              ITEM NAME
-            </h1> */}
             <h1 className="text-lg text-primary-brand relative pointer-events-none pl-2 pr-1 w-fit">
               ITEM NAME
             </h1>
@@ -210,9 +290,21 @@ const CreateMoonboardCard = ({ image, title }: CreateMoonboardCardProps) => {
         <img src={image} alt="" />
       </div>
       <div className="absolute bottom-2 right-2">
-        <IconButton className="bg-white rounded-full px-2">
-          <Check />
-        </IconButton>
+        {selected ? (
+          <IconButton
+            onClick={() => onSelectedChange(!selected)}
+            className="bg-white enabled:px-2 enabled:rounded-full"
+          >
+            <Check />
+          </IconButton>
+        ) : (
+          <IconButton
+            onClick={() => onSelectedChange(!selected)}
+            className="enabled:bg-primary-brand enabled:px-2 enabled:rounded-full enabled:hover:bg-text-standard"
+          >
+            <PlusCross />
+          </IconButton>
+        )}
       </div>
     </div>
   );

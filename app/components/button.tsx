@@ -21,13 +21,13 @@ export const Button = ({
       {...props}
       disabled={props.disabled || loading}
       className={`bg-primary-brand border-outlines
-        border-2 text-white font-bold p-2 px-4 rounded-md
+        border-2 text-white font-bold p-2 px-4 rounded-md 
         enabled:hover:bg-accent enabled:hover:text-text-standard 
         enabled:hover:drop-shadow-[5px_5px_0_rgba(30,30,30,1)]
         enabled:fill-outlines disabled:bg-transparent
         disabled:text-text-low-contrast disabled:border-text-low-contrast
         disabled:fill-text-low-contrast
-        min-w-[150px]
+        min-w-[150px] 
         ${className}`}
     >
       {children}
