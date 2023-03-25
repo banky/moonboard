@@ -62,4 +62,34 @@ describe("MoonBoard", function () {
     const boards = await moonBoard.getAllMoonboards();
     expect(boards.length).to.equal(3);
   });
+
+  it.only("deletes a moonboard", async () => {
+    const { moonBoard, moonPin, owner, otherAccount } = await loadFixture(
+      deployMoonboardFixture
+    );
+
+    await moonBoard.createMoonboard("test moonboard", [
+      "ipfs://test-url",
+      "ipfs://test-url2",
+    ]);
+
+    await moonBoard.createMoonboard("test moonboard2", [
+      "ipfs://test-url",
+      "ipfs://test-url2",
+    ]);
+
+    await moonBoard
+      .connect(otherAccount)
+      .createMoonboard("test moonboard3", [
+        "ipfs://test-url",
+        "ipfs://test-url2",
+      ]);
+
+    await moonBoard.deleteMoonboard(0);
+    await moonBoard.deleteMoonboard(0);
+
+    const boards = await moonBoard.getAllMoonboards();
+
+    expect(boards.length).to.equal(1);
+  });
 });

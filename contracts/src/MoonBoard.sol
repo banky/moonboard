@@ -10,6 +10,7 @@ contract MoonBoard {
         string name;
         uint[] moonpinIds;
         uint votes;
+        address owner;
     }
 
     mapping(address => Board[]) public moonboards;
@@ -32,7 +33,8 @@ contract MoonBoard {
         Board memory board = Board({
             name: name,
             moonpinIds: new uint[](tokenURIs.length),
-            votes: 0
+            votes: 0,
+            owner: msg.sender
         });
 
         for (uint i = 0; i < tokenURIs.length; i++) {
@@ -58,7 +60,10 @@ contract MoonBoard {
     function deleteMoonboard(uint index) public {
         numMoonboards--;
 
-        delete moonboards[msg.sender][index];
+        moonboards[msg.sender][index] = moonboards[msg.sender][
+            moonboards[msg.sender].length - 1
+        ];
+        moonboards[msg.sender].pop();
     }
 
     function updateMoonboardName(uint index, string memory name) public {

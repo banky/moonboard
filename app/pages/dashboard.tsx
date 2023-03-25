@@ -158,6 +158,7 @@ const MoonboardSlot = () => {
   };
 
   const moonboards = data as any[];
+  console.log(moonboards);
 
   return (
     <div>
@@ -305,13 +306,6 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
     enabled: votes !== undefined && voteCount === 0,
   });
   const { writeAsync: vote } = useContractWrite(voteConfig);
-
-  // const { data: votes, refetch: refetchVotes } = useContractRead({
-  //   address: contractAddress as `0x${string}`,
-  //   abi: MoonpinABI.abi,
-  //   functionName: "votes",
-  //   args: [moonpinId],
-  // });
 
   const onClickVote = async () => {
     const sendTransactionResult = await vote?.();
