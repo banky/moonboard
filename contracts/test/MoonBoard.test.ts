@@ -15,18 +15,22 @@ describe("MoonBoard", function () {
     const moonBoard = await MoonBoardFactory.deploy(moonPin.address);
     await moonBoard.deployed();
 
-    return { moonBoard, moonPin, owner, otherAccount };
+    const createBoardFee = await moonBoard.createBoardFee();
+    const pinFee = await moonBoard.pinFee();
+
+    return { moonBoard, moonPin, owner, otherAccount, createBoardFee, pinFee };
   }
 
   it("Should create a moonBoard", async () => {
-    const { moonBoard, moonPin, owner } = await loadFixture(
+    const { moonBoard, moonPin, owner, createBoardFee } = await loadFixture(
       deployMoonboardFixture
     );
 
-    await moonBoard.createMoonboard("test moonboard", [
-      "ipfs://test-url",
-      "ipfs://test-url2",
-    ]);
+    await moonBoard.createMoonboard(
+      "test moonboard",
+      ["ipfs://test-url", "ipfs://test-url2"],
+      { value: createBoardFee }
+    );
 
     const board = await moonBoard.getMoonboard(owner.address, 0);
     expect(board.name).to.equal("test moonboard");
@@ -38,52 +42,56 @@ describe("MoonBoard", function () {
   });
 
   it("gets all moonboards", async () => {
-    const { moonBoard, moonPin, owner, otherAccount } = await loadFixture(
-      deployMoonboardFixture
+    const { moonBoard, moonPin, owner, otherAccount, createBoardFee } =
+      await loadFixture(deployMoonboardFixture);
+
+    await moonBoard.createMoonboard(
+      "test moonboard",
+      ["ipfs://test-url", "ipfs://test-url2"],
+      { value: createBoardFee }
     );
 
-    await moonBoard.createMoonboard("test moonboard", [
-      "ipfs://test-url",
-      "ipfs://test-url2",
-    ]);
-
-    await moonBoard.createMoonboard("test moonboard2", [
-      "ipfs://test-url",
-      "ipfs://test-url2",
-    ]);
+    await moonBoard.createMoonboard(
+      "test moonboard2",
+      ["ipfs://test-url", "ipfs://test-url2"],
+      { value: createBoardFee }
+    );
 
     await moonBoard
       .connect(otherAccount)
-      .createMoonboard("test moonboard3", [
-        "ipfs://test-url",
-        "ipfs://test-url2",
-      ]);
+      .createMoonboard(
+        "test moonboard3",
+        ["ipfs://test-url", "ipfs://test-url2"],
+        { value: createBoardFee }
+      );
 
     const boards = await moonBoard.getAllMoonboards();
     expect(boards.length).to.equal(3);
   });
 
   it("deletes a moonboard", async () => {
-    const { moonBoard, moonPin, owner, otherAccount } = await loadFixture(
-      deployMoonboardFixture
+    const { moonBoard, moonPin, owner, otherAccount, createBoardFee } =
+      await loadFixture(deployMoonboardFixture);
+
+    await moonBoard.createMoonboard(
+      "test moonboard",
+      ["ipfs://test-url", "ipfs://test-url2"],
+      { value: createBoardFee }
     );
 
-    await moonBoard.createMoonboard("test moonboard", [
-      "ipfs://test-url",
-      "ipfs://test-url2",
-    ]);
-
-    await moonBoard.createMoonboard("test moonboard2", [
-      "ipfs://test-url",
-      "ipfs://test-url2",
-    ]);
+    await moonBoard.createMoonboard(
+      "test moonboard2",
+      ["ipfs://test-url", "ipfs://test-url2"],
+      { value: createBoardFee }
+    );
 
     await moonBoard
       .connect(otherAccount)
-      .createMoonboard("test moonboard3", [
-        "ipfs://test-url",
-        "ipfs://test-url2",
-      ]);
+      .createMoonboard(
+        "test moonboard3",
+        ["ipfs://test-url", "ipfs://test-url2"],
+        { value: createBoardFee }
+      );
 
     await moonBoard.deleteMoonboard(0);
     await moonBoard.deleteMoonboard(0);
@@ -94,14 +102,14 @@ describe("MoonBoard", function () {
   });
 
   it("votes and pins on a moonboard", async () => {
-    const { moonBoard, moonPin, owner, otherAccount } = await loadFixture(
-      deployMoonboardFixture
-    );
+    const { moonBoard, moonPin, owner, otherAccount, createBoardFee } =
+      await loadFixture(deployMoonboardFixture);
 
-    await moonBoard.createMoonboard("test moonboard", [
-      "ipfs://test-url",
-      "ipfs://test-url2",
-    ]);
+    await moonBoard.createMoonboard(
+      "test moonboard",
+      ["ipfs://test-url", "ipfs://test-url2"],
+      { value: createBoardFee }
+    );
 
     await moonPin.vote(0);
     await moonPin.pin(0);
@@ -116,5 +124,38 @@ describe("MoonBoard", function () {
     const board2 = await moonBoard.getMoonboard(owner.address, 0);
     expect(board2.votes).to.equal(0);
     expect(board2.pins).to.equal(0);
+  });
+
+  it("pins and unpins", async () => {
+    const { moonBoard, moonPin, owner, otherAccount, createBoardFee, pinFee } =
+      await loadFixture(deployMoonboardFixture);
+
+    await moonBoard.createMoonboard(
+      "test moonboard",
+      ["ipfs://test-url", "ipfs://test-url2"],
+      { value: createBoardFee }
+    );
+
+    await moonBoard
+      .connect(otherAccount)
+      .createMoonboard(
+        "test moonboard2",
+        ["ipfs://test-url", "ipfs://test-url2"],
+        { value: createBoardFee }
+      );
+
+    await moonBoard.connect(otherAccount).pinToBoard(0, 0, { value: pinFee });
+
+    const board = await moonBoard.getMoonboard(otherAccount.address, 0);
+    const sourceBoard = await moonBoard.getMoonboard(owner.address, 0);
+    expect(board.externalMoonpinIds[0]).to.equal(0);
+
+    expect(sourceBoard.pins).to.equal(1);
+
+    await moonBoard.connect(otherAccount).unpinFromBoard(0, 0);
+    const board2 = await moonBoard.getMoonboard(otherAccount.address, 0);
+    const sourceBoard2 = await moonBoard.getMoonboard(owner.address, 0);
+    expect(board2.externalMoonpinIds.length).to.equal(0);
+    expect(sourceBoard2.pins).to.equal(0);
   });
 });

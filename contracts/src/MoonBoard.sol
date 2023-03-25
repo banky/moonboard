@@ -5,16 +5,21 @@ import "hardhat/console.sol";
 
 contract MoonBoard {
     address public moonpinContract;
+    uint public createBoardFee = 0.01 ether;
+    uint public pinFee = 0.0001 ether;
+    address immutable deployoor = msg.sender;
 
     struct Board {
         string name;
         uint[] moonpinIds;
+        uint[] externalMoonpinIds;
         address owner;
     }
 
     struct BoardWithMetadata {
         string name;
         uint[] moonpinIds;
+        uint[] externalMoonpinIds;
         address owner;
         uint votes;
         uint pins;
@@ -32,10 +37,12 @@ contract MoonBoard {
     function createMoonboard(
         string memory name,
         string[] memory tokenURIs
-    ) public returns (uint) {
+    ) public payable returns (uint) {
+        require(msg.value >= createBoardFee, "Not enough ETH sent to create");
         Board memory board = Board({
             name: name,
             moonpinIds: new uint[](tokenURIs.length),
+            externalMoonpinIds: new uint[](0),
             owner: msg.sender
         });
 
@@ -107,6 +114,44 @@ contract MoonBoard {
         return applyMetadataToBoards(allMoonboards);
     }
 
+    function pinToBoard(
+        uint sourceMonnpinId,
+        uint targetBoardIndex
+    ) public payable {
+        require(msg.value >= pinFee, "Not enough ETH sent to pin");
+        address owner = msg.sender;
+        Board storage targetBoard = moonboards[owner][targetBoardIndex];
+        targetBoard.externalMoonpinIds.push(sourceMonnpinId);
+
+        MoonPin(moonpinContract).pin(sourceMonnpinId);
+    }
+
+    function unpinFromBoard(
+        uint sourceMonnpinId,
+        uint targetBoardIndex
+    ) public {
+        address owner = msg.sender;
+        Board storage targetBoard = moonboards[owner][targetBoardIndex];
+        uint[] storage externalMoonpinIds = targetBoard.externalMoonpinIds;
+
+        for (uint i = 0; i < externalMoonpinIds.length; i++) {
+            if (externalMoonpinIds[i] == sourceMonnpinId) {
+                externalMoonpinIds[i] = externalMoonpinIds[
+                    externalMoonpinIds.length - 1
+                ];
+                externalMoonpinIds.pop();
+                break;
+            }
+        }
+
+        MoonPin(moonpinContract).unpin(sourceMonnpinId);
+    }
+
+    function withdraw(address payable recipient, uint amount) public {
+        require(msg.sender == deployoor, "Only deployoor can withdraw");
+        recipient.transfer(amount);
+    }
+
     function applyMetadataToBoards(
         Board[] memory boards
     ) internal view returns (BoardWithMetadata[] memory) {
@@ -126,6 +171,7 @@ contract MoonBoard {
             boardsWithMetadata[i] = BoardWithMetadata({
                 name: board.name,
                 moonpinIds: board.moonpinIds,
+                externalMoonpinIds: board.externalMoonpinIds,
                 owner: board.owner,
                 votes: votes,
                 pins: pins
@@ -136,20 +182,21 @@ contract MoonBoard {
     }
 
     function applyMetadataToBoard(
-        Board memory boards
+        Board memory board
     ) internal view returns (BoardWithMetadata memory) {
         uint votes = 0;
         uint pins = 0;
-        for (uint j = 0; j < boards.moonpinIds.length; j++) {
-            uint moonpinId = boards.moonpinIds[j];
+        for (uint j = 0; j < board.moonpinIds.length; j++) {
+            uint moonpinId = board.moonpinIds[j];
             votes += MoonPin(moonpinContract).getVotes(moonpinId);
             pins += MoonPin(moonpinContract).getPins(moonpinId);
         }
 
         BoardWithMetadata memory boardsWithMetadata = BoardWithMetadata({
-            name: boards.name,
-            moonpinIds: boards.moonpinIds,
-            owner: boards.owner,
+            name: board.name,
+            moonpinIds: board.moonpinIds,
+            externalMoonpinIds: board.externalMoonpinIds,
+            owner: board.owner,
             votes: votes,
             pins: pins
         });
