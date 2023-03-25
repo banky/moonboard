@@ -5,12 +5,14 @@ import { IconButton } from "components/icon-button";
 import { MoonBoardABI, MoonpinABI } from "contracts";
 import { BigNumber } from "ethers";
 import { ipfsToUrl } from "helpers/ipfs";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Masonry from "react-masonry-css";
 import { Sort } from "svg/sort";
 import { Thumb } from "svg/thumb";
 import {
+  useAccount,
   useContractRead,
   useContractWrite,
   usePrepareContractWrite,
@@ -102,13 +104,11 @@ type MoonpinCardProps = {
 };
 
 const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
-  // const votes = 0;
-  const pins = 0;
-
-  const contractAddress =
+  const { address } = useAccount();
+  const moonpinContract =
     process.env.NEXT_PUBLIC_MOONPIN_CONTRACT_ADDRESS ?? "";
   const { data: tokenUri, refetch: refetchMoonboards } = useContractRead({
-    address: contractAddress as `0x${string}`,
+    address: moonpinContract as `0x${string}`,
     abi: MoonpinABI.abi,
     functionName: "tokenURI",
     args: [moonpinId],
@@ -125,44 +125,117 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
     },
   });
 
+  const { data: voted, refetch: refetchVoted } = useContractRead({
+    address: moonpinContract as `0x${string}`,
+    abi: MoonpinABI.abi,
+    functionName: "getVoted",
+    args: [address, moonpinId],
+  });
+  const hasVoted = (voted as boolean) ?? false;
+
+  const { data: pinned, refetch: refetchPinned } = useContractRead({
+    address: moonpinContract as `0x${string}`,
+    abi: MoonpinABI.abi,
+    functionName: "getHasPinned",
+    args: [address, moonpinId],
+  });
+  const hasPinned = (pinned as boolean) ?? false;
+
   const { data: votes, refetch: refetchVotes } = useContractRead({
-    address: contractAddress as `0x${string}`,
+    address: moonpinContract as `0x${string}`,
     abi: MoonpinABI.abi,
     functionName: "getVotes",
     args: [moonpinId],
   });
   const voteCount = (votes as BigNumber)?.toNumber() ?? 0;
 
+  const { data: pins, refetch: refetchPins } = useContractRead({
+    address: moonpinContract as `0x${string}`,
+    abi: MoonpinABI.abi,
+    functionName: "getPins",
+    args: [moonpinId],
+  });
+  const pinCount = (pins as BigNumber)?.toNumber() ?? 0;
+
   const { config: voteConfig } = usePrepareContractWrite({
-    address: contractAddress as `0x${string}`,
+    address: moonpinContract as `0x${string}`,
     abi: MoonpinABI.abi,
     functionName: "vote",
     args: [moonpinId],
-    enabled: votes !== undefined && voteCount === 0,
+    enabled: voted !== undefined && hasVoted === false,
   });
   const { writeAsync: vote } = useContractWrite(voteConfig);
 
-  // const { data: votes, refetch: refetchVotes } = useContractRead({
-  //   address: contractAddress as `0x${string}`,
-  //   abi: MoonpinABI.abi,
-  //   functionName: "votes",
-  //   args: [moonpinId],
-  // });
+  const { config: pinConfig } = usePrepareContractWrite({
+    address: moonpinContract as `0x${string}`,
+    abi: MoonpinABI.abi,
+    functionName: "pin",
+    args: [moonpinId],
+    enabled: pinned !== undefined && hasPinned === false,
+  });
+  const { writeAsync: pin } = useContractWrite(pinConfig);
+
+  const { config: downvoteConfig } = usePrepareContractWrite({
+    address: moonpinContract as `0x${string}`,
+    abi: MoonpinABI.abi,
+    functionName: "downvote",
+    args: [moonpinId],
+    enabled: voted !== undefined && hasVoted === true,
+  });
+  const { writeAsync: downvote } = useContractWrite(downvoteConfig);
+
+  const { config: unpinConfig } = usePrepareContractWrite({
+    address: moonpinContract as `0x${string}`,
+    abi: MoonpinABI.abi,
+    functionName: "unpin",
+    args: [moonpinId],
+    enabled: pinned !== undefined && hasPinned === true,
+  });
+  const { writeAsync: unpin } = useContractWrite(unpinConfig);
 
   const onClickVote = async () => {
-    const sendTransactionResult = await vote?.();
-    await sendTransactionResult?.wait();
+    if (hasVoted) {
+      const sendTransactionResult = await downvote?.();
+      await sendTransactionResult?.wait();
+    } else {
+      const sendTransactionResult = await vote?.();
+      await sendTransactionResult?.wait();
+    }
 
     refetchVotes();
   };
 
-  const hasVoted = voteCount > 0;
+  const onClickPin = async () => {
+    if (hasPinned) {
+      const sendTransactionResult = await unpin?.();
+      await sendTransactionResult?.wait();
+    } else {
+      const sendTransactionResult = await pin?.();
+      await sendTransactionResult?.wait();
+    }
+
+    refetchPins();
+  };
 
   return (
     <div className="border-2 border-outlines rounded-2xl relative overflow-hidden mb-4">
-      <div>
+      <div className="relative">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={moonpin?.image} alt="" />
+        <div className="absolute bottom-4 right-4">
+          <IconButton
+            onClick={onClickPin}
+            className="enabled:rounded-full enabled:hover:bg-transparent 
+          enabled:hover:border-none enabled:border-none enabled:hover:scale-110 transition"
+          >
+            <Image
+              src={"/images/moonboard-icon.png"}
+              width={30}
+              height={30}
+              alt=""
+            />
+          </IconButton>
+        </div>
       </div>
       <div className="flex justify-between px-4 py-2">
         <div className="flex gap-4">
@@ -178,7 +251,7 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
           <div className="flex flex-col">
             <p className="">Pins</p>
             <h3 className="">
-              {pins.toLocaleString("en-US", {
+              {pinCount.toLocaleString("en-US", {
                 minimumIntegerDigits: 3,
                 useGrouping: false,
               })}

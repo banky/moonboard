@@ -66,4 +66,11 @@ contract MoonPin is ERC721URIStorage {
     function getPins(uint tokenId) public view returns (uint) {
         return pins[tokenId];
     }
+
+    function getHasPinned(
+        address pinner,
+        uint tokenId
+    ) public view returns (bool) {
+        return hasPinned[pinner][tokenId];
+    }
 }

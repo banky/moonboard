@@ -35,7 +35,7 @@ export default function Home() {
   const allMoonboards = (data as any[]) ?? [];
 
   let index = 0;
-  let prevOwner = allMoonboards[0].owner ?? "";
+  let prevOwner = allMoonboards[0]?.owner ?? "";
   let moonboardsWithIndexes: any[] = [];
   allMoonboards.forEach((moonboard) => {
     if (moonboard.owner !== prevOwner) {
