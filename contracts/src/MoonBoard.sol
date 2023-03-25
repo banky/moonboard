@@ -43,6 +43,10 @@ contract MoonBoard {
         return moonboards[msg.sender].length - 1;
     }
 
+    function deleteMoonboard(uint index) public {
+        delete moonboards[msg.sender][index];
+    }
+
     function updateMoonboardName(uint index, string memory name) public {
         moonboards[msg.sender][index].name = name;
     }

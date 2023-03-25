@@ -134,6 +134,10 @@ type MoonPin = {
 };
 
 const Publish = ({ files, setPageState }: PublishProps) => {
+  const [enteringTitle, setEnteringTitle] = useState(false);
+  const [moonboardName, setMoonboardName] = useState("");
+  const showPlaceholder = !enteringTitle && moonboardName === "";
+
   const [loadingState, setLoadingState] = useState<"initial" | "ipfs" | "mint">(
     "initial"
   );
@@ -182,7 +186,7 @@ const Publish = ({ files, setPageState }: PublishProps) => {
     setLoadingState("mint");
 
     const sendTransactionResult = await onCreateMoonboard?.({
-      recklesslySetUnpreparedArgs: ["test moonboard", tokenUris],
+      recklesslySetUnpreparedArgs: [moonboardName, tokenUris],
     });
     await sendTransactionResult?.wait();
 
@@ -196,10 +200,6 @@ const Publish = ({ files, setPageState }: PublishProps) => {
     mint: "Confirm in wallet...",
     initial: "Publish Moonboard",
   }[loadingState];
-
-  const [enteringTitle, setEnteringTitle] = useState(false);
-  const [moonboardName, setMoonboardName] = useState("");
-  const showPlaceholder = !enteringTitle && moonboardName === "";
 
   return (
     <main>

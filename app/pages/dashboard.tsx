@@ -3,7 +3,12 @@ import { FilterTab, Filter } from "components/filter";
 import Link from "next/link";
 import { Sort } from "svg/sort";
 import { useState } from "react";
-import { useAccount, useContractRead } from "wagmi";
+import {
+  useAccount,
+  useContractRead,
+  useContractWrite,
+  usePrepareContractWrite,
+} from "wagmi";
 import { MoonBoardABI, MoonpinABI } from "contracts";
 import { BigNumber } from "ethers";
 import Masonry from "react-masonry-css";
@@ -94,7 +99,7 @@ export default function Dashboard() {
           </Link>
         </div>
       </div>
-      {getSlot()}
+      <div className="max-w-6xl mx-auto">{getSlot()}</div>
     </main>
   );
 }
@@ -130,12 +135,27 @@ const MoonboardSlot = () => {
     process.env.NEXT_PUBLIC_MOONBOARD_CONTRACT_ADDRESS ?? "";
   const { address } = useAccount();
 
-  const { data } = useContractRead({
+  const { data, refetch: refetchMoonboards } = useContractRead({
     address: contractAddress as `0x${string}`,
     abi: MoonBoardABI.abi,
     functionName: "getMoonboards",
     args: [address],
   });
+
+  const { writeAsync: deleteMoonboard } = useContractWrite({
+    mode: "recklesslyUnprepared",
+    address: contractAddress as `0x${string}`,
+    abi: MoonBoardABI.abi,
+    functionName: "deleteMoonboard",
+  });
+
+  const onClickDeleteMoonboard = async (index: number) => {
+    const sendTransactionResult = await deleteMoonboard({
+      recklesslySetUnpreparedArgs: [index],
+    });
+    await sendTransactionResult.wait();
+    await refetchMoonboards();
+  };
 
   const moonboards = data as any[];
   console.log("moonboards", moonboards);
@@ -143,7 +163,7 @@ const MoonboardSlot = () => {
   return (
     <div>
       {moonboards.map((moonboard, index) => (
-        <div key={index}>
+        <div key={index} className="mb-8">
           <MoonBoard
             title={moonboard.name}
             moonpinIds={moonboard.moonpinIds.map((n: BigNumber) =>
@@ -151,6 +171,7 @@ const MoonboardSlot = () => {
             )}
             votes={moonboard.votes.toNumber()}
             pins={0}
+            onClickDelete={() => onClickDeleteMoonboard(index)}
           />
         </div>
       ))}
@@ -163,12 +184,19 @@ type MoonboardProps = {
   moonpinIds: number[];
   votes: number;
   pins: number;
+  onClickDelete: () => void;
 };
 
-const MoonBoard = ({ title, moonpinIds, votes, pins }: MoonboardProps) => {
+const MoonBoard = ({
+  title,
+  moonpinIds,
+  votes,
+  pins,
+  onClickDelete,
+}: MoonboardProps) => {
   return (
     <div className="border-2 border-outlines rounded-xl overflow-hidden">
-      <div className="flex justify-between bg-black px-8 py-2">
+      <div className="flex justify-between bg-black px-8 py-4">
         <h3 className="text-white">{title}</h3>
 
         <div className="flex items-center gap-4">
@@ -219,6 +247,10 @@ const MoonBoard = ({ title, moonpinIds, votes, pins }: MoonboardProps) => {
           ))}
         </Masonry>
       </div>
+
+      <div className="flex justify-end m-8">
+        <Button onClick={onClickDelete}>Delete Moonboard</Button>
+      </div>
     </div>
   );
 };
@@ -228,7 +260,7 @@ type MoonpinCardProps = {
 };
 
 const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
-  const votes = 0;
+  // const votes = 0;
   const pins = 0;
 
   const contractAddress =
@@ -239,8 +271,6 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
     functionName: "tokenURI",
     args: [moonpinId],
   });
-
-  console.log("tokenUri:", tokenUri);
 
   const { data: moonpin } = useQuery({
     queryKey: ["moonpin", moonpinId],
@@ -253,6 +283,39 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
     },
   });
 
+  const { data: votes, refetch: refetchVotes } = useContractRead({
+    address: contractAddress as `0x${string}`,
+    abi: MoonpinABI.abi,
+    functionName: "getVotes",
+    args: [moonpinId],
+  });
+  const voteCount = (votes as BigNumber)?.toNumber() ?? 0;
+
+  const { config: voteConfig } = usePrepareContractWrite({
+    address: contractAddress as `0x${string}`,
+    abi: MoonpinABI.abi,
+    functionName: "vote",
+    args: [moonpinId],
+    enabled: votes !== undefined && voteCount === 0,
+  });
+  const { writeAsync: vote } = useContractWrite(voteConfig);
+
+  // const { data: votes, refetch: refetchVotes } = useContractRead({
+  //   address: contractAddress as `0x${string}`,
+  //   abi: MoonpinABI.abi,
+  //   functionName: "votes",
+  //   args: [moonpinId],
+  // });
+
+  const onClickVote = async () => {
+    const sendTransactionResult = await vote?.();
+    await sendTransactionResult?.wait();
+
+    refetchVotes();
+  };
+
+  const hasVoted = voteCount > 0;
+
   return (
     <div className="border-2 border-outlines rounded-2xl relative overflow-hidden mb-4">
       <div>
@@ -264,7 +327,7 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
           <div className="flex flex-col">
             <p className="">Votes</p>
             <h3 className="">
-              {votes.toLocaleString("en-US", {
+              {voteCount.toLocaleString("en-US", {
                 minimumIntegerDigits: 3,
                 useGrouping: false,
               })}
@@ -280,8 +343,14 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
             </h3>
           </div>
         </div>
-        <IconButton className="enabled:bg-primary-brand enabled:hover:bg-black enabled:px-4 enabled:rounded-full">
-          <Thumb />
+        <IconButton
+          onClick={onClickVote}
+          className={`enabled:bg-primary-brand enabled:hover:bg-black enabled:px-4 enabled:rounded-full
+          ${hasVoted ? "enabled:bg-red-500" : ""}`}
+        >
+          <div className={`${hasVoted ? "rotate-180" : ""}`}>
+            <Thumb />
+          </div>
         </IconButton>
       </div>
     </div>

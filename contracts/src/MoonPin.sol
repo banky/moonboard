@@ -5,9 +5,9 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract MoonPin is ERC721URIStorage {
-    // address => tokenId => vote
-    mapping(address => mapping(uint => uint)) public votes;
-    mapping(address => mapping(uint => address)) public voted;
+    // tokenId => vote
+    mapping(uint => uint) public votes;
+    mapping(address => mapping(uint => bool)) public voted;
 
     using Counters for Counters.Counter;
     Counters.Counter private tokenIdCounter;
@@ -24,12 +24,25 @@ contract MoonPin is ERC721URIStorage {
         tokenIdCounter.increment();
     }
 
-    function vote(address receiver, uint tokenId) public {
-        require(
-            voted[receiver][tokenId] == address(0),
-            "MoonPin: already voted"
-        );
+    function vote(uint tokenId) public {
+        require(!voted[msg.sender][tokenId], "MoonPin: already voted");
 
-        votes[receiver][tokenId] += 1;
+        votes[tokenId] += 1;
+        voted[msg.sender][tokenId] = true;
+    }
+
+    function downvote(uint tokenId) public {
+        require(voted[msg.sender][tokenId], "MoonPin: has not voted");
+
+        votes[tokenId] -= 1;
+        voted[msg.sender][tokenId] = false;
+    }
+
+    function getVotes(uint tokenId) public view returns (uint) {
+        return votes[tokenId];
+    }
+
+    function getVoted(address voter, uint tokenId) public view returns (bool) {
+        return voted[voter][tokenId];
     }
 }
