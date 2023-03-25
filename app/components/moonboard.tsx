@@ -1,183 +1,17 @@
-import { Button } from "components/button";
-import { FilterTab, Filter } from "components/filter";
-import Link from "next/link";
-import { Sort } from "svg/sort";
-import { useState } from "react";
-import {
-  useAccount,
-  useContractRead,
-  useContractWrite,
-  usePrepareContractWrite,
-} from "wagmi";
-import { MoonBoardABI, MoonpinABI } from "contracts";
-import { BigNumber } from "ethers";
-import Masonry from "react-masonry-css";
 import { useQuery } from "@tanstack/react-query";
+import { MoonpinABI } from "contracts";
+import { BigNumber } from "ethers";
 import { ipfsToUrl } from "helpers/ipfs";
-import { IconButton } from "components/icon-button";
+import Link from "next/link";
+import Masonry from "react-masonry-css";
 import { Thumb } from "svg/thumb";
-
-export default function Dashboard() {
-  const [slot, setSlot] = useState<
-    "yourPins" | "moonPins" | "moonBoards" | "settings"
-  >("moonBoards");
-
-  const getSlot = () => {
-    switch (slot) {
-      case "yourPins":
-        return null;
-      case "moonPins":
-        return null;
-      case "moonBoards":
-        return <MoonboardSlot />;
-      case "settings":
-        return null;
-    }
-  };
-
-  return (
-    <main>
-      <h1 className="my-8 text-center">Dashboard</h1>
-
-      <div className="flex items-center justify-between mb-16">
-        <div className="flex gap-8">
-          <TabBarItem
-            currentSlot={slot}
-            slot="yourPins"
-            onClick={() => setSlot("yourPins")}
-          >
-            Your Pins
-          </TabBarItem>
-          <TabBarItem
-            currentSlot={slot}
-            slot="moonPins"
-            onClick={() => setSlot("moonPins")}
-          >
-            Moonpins
-          </TabBarItem>
-          <TabBarItem
-            currentSlot={slot}
-            slot="moonBoards"
-            onClick={() => setSlot("moonBoards")}
-          >
-            Moonboards
-          </TabBarItem>
-          <TabBarItem
-            currentSlot={slot}
-            slot="settings"
-            onClick={() => setSlot("settings")}
-          >
-            Settings
-          </TabBarItem>
-        </div>
-
-        <div className="flex gap-4 items-center">
-          <div className="flex items-center gap-4 h-10">
-            <Filter>
-              <FilterTab filter="pins" isDefault>
-                <div className="flex items-center gap-2">
-                  <p>Most Pins</p>
-                  <Sort />
-                </div>
-              </FilterTab>
-              <FilterTab filter="votes">
-                <div className="flex items-center gap-2">
-                  <p>Most Votes</p>
-                  <Sort />
-                </div>
-              </FilterTab>
-              <FilterTab filter="latest">
-                <div className="flex items-center gap-2">
-                  <p>Latest</p>
-                  <Sort />
-                </div>
-              </FilterTab>
-            </Filter>
-          </div>
-          <Link href="/create-moonboard">
-            <Button>Create Moonboard</Button>
-          </Link>
-        </div>
-      </div>
-      <div className="max-w-6xl mx-auto">{getSlot()}</div>
-    </main>
-  );
-}
-
-type TabBarItemProps = {
-  currentSlot: "yourPins" | "moonPins" | "moonBoards" | "settings";
-  slot: "yourPins" | "moonPins" | "moonBoards" | "settings";
-  onClick: () => void;
-  children: React.ReactNode;
-};
-
-const TabBarItem = ({
-  currentSlot,
-  slot,
-  onClick,
-  children,
-}: TabBarItemProps) => {
-  const selected = currentSlot === slot;
-  return (
-    <button
-      className={`bg-none  py-4 ${
-        selected ? "font-bold border-b-4 border-b-primary-brand" : ""
-      }`}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  );
-};
-
-const MoonboardSlot = () => {
-  const contractAddress =
-    process.env.NEXT_PUBLIC_MOONBOARD_CONTRACT_ADDRESS ?? "";
-  const { address } = useAccount();
-
-  const { data, refetch: refetchMoonboards } = useContractRead({
-    address: contractAddress as `0x${string}`,
-    abi: MoonBoardABI.abi,
-    functionName: "getMoonboards",
-    args: [address],
-  });
-
-  const { writeAsync: deleteMoonboard } = useContractWrite({
-    mode: "recklesslyUnprepared",
-    address: contractAddress as `0x${string}`,
-    abi: MoonBoardABI.abi,
-    functionName: "deleteMoonboard",
-  });
-
-  const onClickDeleteMoonboard = async (index: number) => {
-    const sendTransactionResult = await deleteMoonboard({
-      recklesslySetUnpreparedArgs: [index],
-    });
-    await sendTransactionResult.wait();
-    await refetchMoonboards();
-  };
-
-  const moonboards = data as any[];
-
-  return (
-    <div>
-      {moonboards.map((moonboard, index) => (
-        <div key={index} className="mb-8">
-          <MoonBoard
-            title={moonboard.name}
-            moonpinIds={moonboard.moonpinIds.map((n: BigNumber) =>
-              n.toNumber()
-            )}
-            votes={moonboard.votes.toNumber()}
-            pins={0}
-            onClickDelete={() => onClickDeleteMoonboard(index)}
-            index={index}
-          />
-        </div>
-      ))}
-    </div>
-  );
-};
+import {
+  useContractRead,
+  usePrepareContractWrite,
+  useContractWrite,
+} from "wagmi";
+import { Button } from "./button";
+import { IconButton } from "./icon-button";
 
 type MoonboardProps = {
   title: string;
@@ -186,18 +20,18 @@ type MoonboardProps = {
   pins: number;
   onClickDelete: () => void;
   index: number;
+  address: string;
 };
 
-const MoonBoard = ({
+export const Moonboard = ({
   title,
   moonpinIds,
   votes,
   pins,
   index,
   onClickDelete,
+  address,
 }: MoonboardProps) => {
-  const { address } = useAccount();
-
   return (
     <div className="border-2 border-outlines rounded-xl overflow-hidden">
       <div className="flex justify-between bg-black px-8 py-4">
