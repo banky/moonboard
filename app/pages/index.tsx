@@ -23,29 +23,27 @@ export default function Home() {
       <h1 className="m-12 text-center">Explore Moonboards</h1>
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          <Filter>
-            <FilterTab filter="pins" isDefault>
-              <div className="flex items-center gap-2">
-                <p>Most Pins</p>
-                <Sort />
-              </div>
-            </FilterTab>
-            <FilterTab filter="votes">
-              <div className="flex items-center gap-2">
-                <p>Most Votes</p>
-                <Sort />
-              </div>
-            </FilterTab>
-            <FilterTab filter="latest">
-              <div className="flex items-center gap-2">
-                <p>Latest</p>
-                <Sort />
-              </div>
-            </FilterTab>
-          </Filter>
-          <Button onClick={open}>Create Moonboard</Button>
-        </div>
+        <Filter>
+          <FilterTab filter="pins" isDefault>
+            <div className="flex items-center gap-2">
+              <p>Most Pins</p>
+              <Sort />
+            </div>
+          </FilterTab>
+          <FilterTab filter="votes">
+            <div className="flex items-center gap-2">
+              <p>Most Votes</p>
+              <Sort />
+            </div>
+          </FilterTab>
+          <FilterTab filter="latest">
+            <div className="flex items-center gap-2">
+              <p>Latest</p>
+              <Sort />
+            </div>
+          </FilterTab>
+        </Filter>
+        <Button onClick={open}>Create Moonboard</Button>
       </div>
 
       <Modal isOpen={showDialog} onDismiss={close}>

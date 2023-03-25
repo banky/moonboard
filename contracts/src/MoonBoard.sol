@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 import "./MoonPin.sol";
+import "hardhat/console.sol";
 
 contract MoonBoard {
     address public moonpinContract;
@@ -12,6 +13,9 @@ contract MoonBoard {
     }
 
     mapping(address => Board[]) public moonboards;
+    mapping(address => bool) public hasMoonboard;
+    address[] public addressesWithMoonboards;
+    uint public numMoonboards;
 
     constructor(address _moonpinContract) {
         moonpinContract = _moonpinContract;
@@ -40,10 +44,20 @@ contract MoonBoard {
         }
 
         moonboards[msg.sender].push(board);
+
+        if (!hasMoonboard[msg.sender]) {
+            hasMoonboard[msg.sender] = true;
+            addressesWithMoonboards.push(msg.sender);
+        }
+
+        numMoonboards++;
+
         return moonboards[msg.sender].length - 1;
     }
 
     function deleteMoonboard(uint index) public {
+        numMoonboards--;
+
         delete moonboards[msg.sender][index];
     }
 
@@ -60,5 +74,27 @@ contract MoonBoard {
 
     function getMoonboards(address owner) public view returns (Board[] memory) {
         return moonboards[owner];
+    }
+
+    function getAllMoonboards() public view returns (Board[] memory) {
+        Board[] memory allMoonboards = new Board[](numMoonboards);
+        console.log("numMoonboards", numMoonboards);
+        console.log(
+            "addressesWithMoonboards.length",
+            addressesWithMoonboards.length
+        );
+        uint index = 0;
+        for (uint i = 0; i < addressesWithMoonboards.length; i++) {
+            address owner = addressesWithMoonboards[i];
+            Board[] memory boards = moonboards[owner];
+            for (uint j = 0; j < boards.length; j++) {
+                console.log("index", index);
+                allMoonboards[index] = boards[j];
+
+                index++;
+            }
+        }
+
+        return allMoonboards;
     }
 }

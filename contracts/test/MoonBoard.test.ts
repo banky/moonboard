@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { token } from "../typechain-types/@openzeppelin/contracts";
 
 describe("MoonBoard", function () {
-  async function deployOneYearLockFixture() {
+  async function deployMoonboardFixture() {
     const [owner, otherAccount] = await ethers.getSigners();
 
     const MoonPinFactory = await ethers.getContractFactory("MoonPin");
@@ -20,7 +20,7 @@ describe("MoonBoard", function () {
 
   it("Should create a moonBoard", async () => {
     const { moonBoard, moonPin, owner } = await loadFixture(
-      deployOneYearLockFixture
+      deployMoonboardFixture
     );
 
     await moonBoard.createMoonboard("test moonboard", [
@@ -35,5 +35,31 @@ describe("MoonBoard", function () {
     expect(board.votes).to.equal(0);
     const tokenUri = await moonPin.tokenURI(0);
     expect(tokenUri).to.equal("ipfs://test-url");
+  });
+
+  it("gets all moonboards", async () => {
+    const { moonBoard, moonPin, owner, otherAccount } = await loadFixture(
+      deployMoonboardFixture
+    );
+
+    await moonBoard.createMoonboard("test moonboard", [
+      "ipfs://test-url",
+      "ipfs://test-url2",
+    ]);
+
+    await moonBoard.createMoonboard("test moonboard2", [
+      "ipfs://test-url",
+      "ipfs://test-url2",
+    ]);
+
+    await moonBoard
+      .connect(otherAccount)
+      .createMoonboard("test moonboard3", [
+        "ipfs://test-url",
+        "ipfs://test-url2",
+      ]);
+
+    const boards = await moonBoard.getAllMoonboards();
+    expect(boards.length).to.equal(3);
   });
 });
