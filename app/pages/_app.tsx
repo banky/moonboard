@@ -11,6 +11,7 @@ import dynamic from "next/dynamic";
 import { Header } from "components/header";
 import { mainnet, hardhat, goerli } from "wagmi/chains";
 import { Montserrat } from "next/font/google";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const alchemyId = process.env.ALCHEMY_ID;
 const montserrat = Montserrat({ subsets: ["latin"] });
@@ -23,16 +24,20 @@ const client = createClient(
   })
 );
 
+const queryClient = new QueryClient();
+
 const App = ({ Component, pageProps }: AppProps) => {
   return (
     <WagmiConfig client={client}>
       <ConnectKitProvider>
-        <div className={montserrat.className}>
-          <Header />
-          <div className="mx-8">
-            <Component {...pageProps} />
+        <QueryClientProvider client={queryClient}>
+          <div className={montserrat.className}>
+            <Header />
+            <div className="mx-8">
+              <Component {...pageProps} />
+            </div>
           </div>
-        </div>
+        </QueryClientProvider>
       </ConnectKitProvider>
     </WagmiConfig>
   );

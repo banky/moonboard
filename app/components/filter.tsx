@@ -2,10 +2,10 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Button } from "./button";
 
-type TitleBarTabsProps = {
+type FilterProps = {
   children: React.ReactNode;
 };
-export const TitleBarTabs = ({ children }: TitleBarTabsProps) => {
+export const Filter = ({ children }: FilterProps) => {
   return (
     <div className="flex border-2 rounded-md border-outlines overflow-hidden">
       {children}
@@ -13,13 +13,17 @@ export const TitleBarTabs = ({ children }: TitleBarTabsProps) => {
   );
 };
 
-type TabProps = {
+type FilterTabProps = {
   filter: string;
   children: React.ReactNode;
   isDefault?: boolean;
 };
 
-export const Tab = ({ filter, children, isDefault = false }: TabProps) => {
+export const FilterTab = ({
+  filter,
+  children,
+  isDefault = false,
+}: FilterTabProps) => {
   const { query } = useRouter();
   const isActive =
     query.filter === filter || (query.filter === undefined && isDefault);

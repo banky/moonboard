@@ -45,8 +45,7 @@ type UploadProps = {
 const Upload = ({ files, setFiles, setPageState }: UploadProps) => {
   const [myPictures, setMyPictures] = useState(false);
   const [communityGuidelines, setCommunityGuidelines] = useState(false);
-  // const submitEnabled = myPictures && communityGuidelines && files.length > 0;
-  const submitEnabled = true;
+  const submitEnabled = myPictures && communityGuidelines && files.length > 0;
 
   const handleChange = (files: FileList) => {
     setFiles(Array.from(files));
@@ -171,8 +170,8 @@ const Publish = ({ files, setPageState }: PublishProps) => {
       moonPins.map(async (moonPin) => {
         if (moonPin.selected) {
           return nftStorageClient.store({
-            name: "test moonpin 2",
-            description: "This is a test",
+            name: moonPin.name,
+            description: "",
             image: moonPin.imageFile,
           });
         }
@@ -198,9 +197,32 @@ const Publish = ({ files, setPageState }: PublishProps) => {
     initial: "Publish Moonboard",
   }[loadingState];
 
+  const [enteringTitle, setEnteringTitle] = useState(false);
+  const [moonboardName, setMoonboardName] = useState("");
+  const showPlaceholder = !enteringTitle && moonboardName === "";
+
   return (
     <main>
-      <h1 className="m-12 text-center">Publish Moonboard</h1>
+      <div className="m-12 text-center relative h-20">
+        <input
+          className="placeholder:font-bold placeholder:text-primary-brand w-full
+         bg-background font-headers absolute top-0 left-0 bottom-0 p-4 outline-none text-5xl
+         text-center"
+          onFocus={() => setEnteringTitle(true)}
+          onBlur={() => setEnteringTitle(false)}
+          value={moonboardName}
+          onChange={(e) => setMoonboardName(e.target.value)}
+        />
+        {showPlaceholder ? (
+          <div className="flex items-center justify-center p-4">
+            <h1 className="relative pointer-events-none pl-2 pr-1 w-fit">
+              MOONBOARD NAME
+            </h1>
+            <div className="w-0.5 h-10 mb-2 relative bg-black invisible animate-blink" />
+          </div>
+        ) : null}
+      </div>
+
       <div className="flex justify-between my-32 max-w-6xl mx-auto">
         <Button onClick={() => setPageState("upload")}>Back</Button>
 
@@ -241,13 +263,22 @@ const Publish = ({ files, setPageState }: PublishProps) => {
             <MoonpinCard
               key={moonpin.imageFile.name}
               image={URL.createObjectURL(moonpin.imageFile)}
-              title=""
+              title={moonpin.name}
               selected={moonpin.selected}
               onSelectedChange={(selected: boolean) => {
                 setMoonPins((prev) =>
                   prev.map((pin) =>
                     pin.imageFile.name === moonpin.imageFile.name
                       ? { ...pin, selected }
+                      : pin
+                  )
+                );
+              }}
+              onTitleChange={(title: string) => {
+                setMoonPins((prev) =>
+                  prev.map((pin) =>
+                    pin.imageFile.name === moonpin.imageFile.name
+                      ? { ...pin, name: title }
                       : pin
                   )
                 );
@@ -265,6 +296,7 @@ type MoonpinCardProps = {
   title: string;
   selected: boolean;
   onSelectedChange: (selected: boolean) => void;
+  onTitleChange: (title: string) => void;
 };
 
 const MoonpinCard = ({
@@ -272,8 +304,10 @@ const MoonpinCard = ({
   title,
   selected,
   onSelectedChange,
+  onTitleChange,
 }: MoonpinCardProps) => {
   const [enteringTitle, setEnteringTitle] = useState(false);
+  const showPlaceholder = !enteringTitle && title === "";
 
   return (
     <div className="border-2 border-outlines rounded-2xl relative overflow-hidden mb-4">
@@ -283,8 +317,10 @@ const MoonpinCard = ({
          bg-background font-headers absolute top-0 left-0 bottom-0 p-4 outline-none"
           onFocus={() => setEnteringTitle(true)}
           onBlur={() => setEnteringTitle(false)}
+          value={title}
+          onChange={(e) => onTitleChange(e.target.value)}
         />
-        {!enteringTitle ? (
+        {showPlaceholder ? (
           <div className="flex items-center">
             <h1 className="text-lg text-primary-brand relative pointer-events-none pl-2 pr-1 w-fit">
               ITEM NAME

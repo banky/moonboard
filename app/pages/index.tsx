@@ -1,6 +1,6 @@
 import { useAccount } from "wagmi";
 import { Input } from "components/input";
-import { Tab, TitleBarTabs } from "components/title-bar-tabs";
+import { FilterTab, Filter } from "components/filter";
 import { Button } from "components/button";
 import { Star } from "svg/star";
 import { useState } from "react";
@@ -9,6 +9,7 @@ import { IconButton } from "components/icon-button";
 import { ModalOption } from "components/modal-option";
 import Link from "next/link";
 import { Close } from "svg/close";
+import { Sort } from "svg/sort";
 
 export default function Home() {
   const { address, isConnecting, isDisconnected } = useAccount();
@@ -23,26 +24,26 @@ export default function Home() {
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <TitleBarTabs>
-            <Tab filter="all" isDefault>
+          <Filter>
+            <FilterTab filter="pins" isDefault>
               <div className="flex items-center gap-2">
                 <p>Most Pins</p>
-                <Star />
+                <Sort />
               </div>
-            </Tab>
-            <Tab filter="moonpins">
+            </FilterTab>
+            <FilterTab filter="votes">
               <div className="flex items-center gap-2">
                 <p>Most Votes</p>
-                <Star />
+                <Sort />
               </div>
-            </Tab>
-            <Tab filter="moonboards">
+            </FilterTab>
+            <FilterTab filter="latest">
               <div className="flex items-center gap-2">
                 <p>Latest</p>
-                <Star />
+                <Sort />
               </div>
-            </Tab>
-          </TitleBarTabs>
+            </FilterTab>
+          </Filter>
           <Button onClick={open}>Create Moonboard</Button>
         </div>
       </div>
