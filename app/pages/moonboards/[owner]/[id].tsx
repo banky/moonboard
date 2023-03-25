@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "components/button";
 import { Filter, FilterTab } from "components/filter";
 import { IconButton } from "components/icon-button";
+import { Modal } from "components/modal";
+import { PinSingleModal } from "components/pin-single-modal";
 import { MoonBoardABI, MoonpinABI } from "contracts";
 import { BigNumber } from "ethers";
 import { ipfsToUrl } from "helpers/ipfs";
@@ -9,6 +11,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Masonry from "react-masonry-css";
+import { Close } from "svg/close";
 import { Sort } from "svg/sort";
 import { Thumb } from "svg/thumb";
 import {
@@ -217,14 +220,16 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
     refetchPins();
   };
 
+  const [showPinModal, setShowPinModal] = useState(false);
+
   return (
     <div className="border-2 border-outlines rounded-2xl relative overflow-hidden mb-4">
       <div className="relative">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={moonpin?.image} alt="" />
-        <div className="absolute bottom-4 right-4">
+        <div className="absolute bottom-2 right-2">
           <IconButton
-            onClick={onClickPin}
+            onClick={() => setShowPinModal(true)}
             className="enabled:rounded-full enabled:hover:bg-transparent 
           enabled:hover:border-none enabled:border-none enabled:hover:scale-110 transition"
           >
@@ -268,6 +273,13 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
           </div>
         </IconButton>
       </div>
+
+      <PinSingleModal
+        isOpen={showPinModal}
+        close={() => setShowPinModal(false)}
+        title={moonpin?.title ?? ""}
+        imageUrl={moonpin?.image ?? ""}
+      />
     </div>
   );
 };

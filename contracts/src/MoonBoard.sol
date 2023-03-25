@@ -98,7 +98,6 @@ contract MoonBoard {
             address owner = addressesWithMoonboards[i];
             Board[] memory boards = moonboards[owner];
             for (uint j = 0; j < boards.length; j++) {
-                console.log("index", index);
                 allMoonboards[index] = boards[j];
 
                 index++;
@@ -110,7 +109,7 @@ contract MoonBoard {
 
     function applyMetadataToBoards(
         Board[] memory boards
-    ) public view returns (BoardWithMetadata[] memory) {
+    ) internal view returns (BoardWithMetadata[] memory) {
         BoardWithMetadata[] memory boardsWithMetadata = new BoardWithMetadata[](
             boards.length
         );
@@ -138,7 +137,7 @@ contract MoonBoard {
 
     function applyMetadataToBoard(
         Board memory boards
-    ) public view returns (BoardWithMetadata memory) {
+    ) internal view returns (BoardWithMetadata memory) {
         uint votes = 0;
         uint pins = 0;
         for (uint j = 0; j < boards.moonpinIds.length; j++) {
