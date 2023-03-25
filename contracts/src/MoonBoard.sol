@@ -24,7 +24,7 @@ contract MoonBoard {
     function createMoonboard(
         string memory name,
         string[] memory tokenURIs
-    ) public returns (bool success) {
+    ) public returns (uint) {
         Board memory board = Board({
             name: name,
             moonpinIds: new uint[](tokenURIs.length),
@@ -40,10 +40,21 @@ contract MoonBoard {
         }
 
         moonboards[msg.sender].push(board);
-        return true;
+        return moonboards[msg.sender].length - 1;
     }
 
     function updateMoonboardName(uint index, string memory name) public {
         moonboards[msg.sender][index].name = name;
+    }
+
+    function getMoonboard(
+        address owner,
+        uint index
+    ) public view returns (Board memory) {
+        return moonboards[owner][index];
+    }
+
+    function getMoonboards(address owner) public view returns (Board[] memory) {
+        return moonboards[owner];
     }
 }

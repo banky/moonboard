@@ -4,7 +4,7 @@ import { IconButton } from "components/icon-button";
 import { NavigationButton } from "components/navigation-button";
 import { useRouter } from "next/router";
 import { NFTStorage } from "nft.storage";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import { Plus } from "svg/plus";
 import Masonry from "react-masonry-css";
@@ -12,7 +12,12 @@ import { Check } from "svg/check";
 import { Close } from "svg/close";
 import { PlusCross } from "svg/plus-cross";
 import { MoonBoardABI, MoonpinABI } from "contracts";
-import { useAccount, usePrepareContractWrite, useContractWrite } from "wagmi";
+import {
+  useAccount,
+  usePrepareContractWrite,
+  useContractWrite,
+  useContractRead,
+} from "wagmi";
 
 const fileTypes = ["JPG", "JPEG", "PNG", "GIF"];
 
@@ -40,10 +45,10 @@ type UploadProps = {
 const Upload = ({ files, setFiles, setPageState }: UploadProps) => {
   const [myPictures, setMyPictures] = useState(false);
   const [communityGuidelines, setCommunityGuidelines] = useState(false);
-  const submitEnabled = myPictures && communityGuidelines && files.length > 0;
+  // const submitEnabled = myPictures && communityGuidelines && files.length > 0;
+  const submitEnabled = true;
 
   const handleChange = (files: FileList) => {
-    console.log("files", files);
     setFiles(Array.from(files));
   };
 
@@ -51,7 +56,7 @@ const Upload = ({ files, setFiles, setPageState }: UploadProps) => {
     <main>
       <h1 className="m-12 text-center">Create Moonboard</h1>
 
-      <div className="flex justify-between my-8">
+      <div className="flex justify-between my-32 max-w-6xl mx-auto">
         <NavigationButton href="/">Back</NavigationButton>
 
         <Button
@@ -64,7 +69,7 @@ const Upload = ({ files, setFiles, setPageState }: UploadProps) => {
         </Button>
       </div>
 
-      <div className="border-2 border-outlines rounded-md max-w-2xl mx-auto">
+      <div className="border-2 border-outlines rounded-md max-w-6xl mx-auto">
         <div className="m-4">
           <h3>Upload Pictures to create you Moonboard</h3>
           <p className="">
@@ -145,16 +150,19 @@ const Publish = ({ files, setPageState }: PublishProps) => {
     process.env.NEXT_PUBLIC_MOONBOARD_CONTRACT_ADDRESS ?? "";
   const { address } = useAccount();
 
-  const [tokenUris, setTokenUris] = useState<string[]>([]);
-
-  const { config } = usePrepareContractWrite({
+  const { writeAsync: onCreateMoonboard } = useContractWrite({
+    mode: "recklesslyUnprepared",
     address: contractAddress as `0x${string}`,
     abi: MoonBoardABI.abi,
-    functionName: "createMoonboard",
-    args: ["test moonboard", tokenUris],
-    enabled: tokenUris.length > 0,
+    functionName: "createMoonboard(string,string[])",
   });
-  const { writeAsync: onCreateMoonboard } = useContractWrite(config);
+
+  const { refetch: refetchMoonboards } = useContractRead({
+    address: contractAddress as `0x${string}`,
+    abi: MoonBoardABI.abi,
+    functionName: "getMoonboards",
+    args: [address],
+  });
 
   const onSubmit = async () => {
     setLoadingState("ipfs");
@@ -170,16 +178,18 @@ const Publish = ({ files, setPageState }: PublishProps) => {
         }
       })
     );
-    setTokenUris(metadata.map((token) => token?.url ?? ""));
+    const tokenUris = metadata.map((token) => token?.url ?? "");
 
     setLoadingState("mint");
 
-    const sendTransactionResult = await onCreateMoonboard?.();
+    const sendTransactionResult = await onCreateMoonboard?.({
+      recklesslySetUnpreparedArgs: ["test moonboard", tokenUris],
+    });
     await sendTransactionResult?.wait();
 
-    setLoadingState("initial");
+    const moonboards = await refetchMoonboards();
 
-    // router.push("/publish-moonboard");
+    setLoadingState("initial");
   };
 
   const loadingStateString = {
@@ -187,8 +197,6 @@ const Publish = ({ files, setPageState }: PublishProps) => {
     mint: "Confirm in wallet...",
     initial: "Publish Moonboard",
   }[loadingState];
-
-  console.log("loadingState", loadingState);
 
   return (
     <main>

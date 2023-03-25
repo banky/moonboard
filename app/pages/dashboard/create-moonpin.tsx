@@ -50,8 +50,6 @@ export default function CreateMoonpin() {
       image: file,
     });
 
-    console.log(metadata);
-
     // const sendTransactionResult = await onMint?.();
     // await sendTransactionResult?.wait();
   };
