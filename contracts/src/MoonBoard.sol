@@ -9,8 +9,15 @@ contract MoonBoard {
     struct Board {
         string name;
         uint[] moonpinIds;
-        uint votes;
         address owner;
+    }
+
+    struct BoardWithMetadata {
+        string name;
+        uint[] moonpinIds;
+        address owner;
+        uint votes;
+        uint pins;
     }
 
     mapping(address => Board[]) public moonboards;
@@ -22,10 +29,6 @@ contract MoonBoard {
         moonpinContract = _moonpinContract;
     }
 
-    function vote(address owner, uint index) public {
-        moonboards[owner][index].votes += 1;
-    }
-
     function createMoonboard(
         string memory name,
         string[] memory tokenURIs
@@ -33,7 +36,6 @@ contract MoonBoard {
         Board memory board = Board({
             name: name,
             moonpinIds: new uint[](tokenURIs.length),
-            votes: 0,
             owner: msg.sender
         });
 
@@ -73,21 +75,24 @@ contract MoonBoard {
     function getMoonboard(
         address owner,
         uint index
-    ) public view returns (Board memory) {
-        return moonboards[owner][index];
+    ) public view returns (BoardWithMetadata memory) {
+        return applyMetadataToBoard(moonboards[owner][index]);
     }
 
-    function getMoonboards(address owner) public view returns (Board[] memory) {
-        return moonboards[owner];
+    function getMoonboards(
+        address owner
+    ) public view returns (BoardWithMetadata[] memory) {
+        Board[] memory boards = moonboards[owner];
+        return applyMetadataToBoards(boards);
     }
 
-    function getAllMoonboards() public view returns (Board[] memory) {
+    function getAllMoonboards()
+        public
+        view
+        returns (BoardWithMetadata[] memory)
+    {
         Board[] memory allMoonboards = new Board[](numMoonboards);
-        console.log("numMoonboards", numMoonboards);
-        console.log(
-            "addressesWithMoonboards.length",
-            addressesWithMoonboards.length
-        );
+
         uint index = 0;
         for (uint i = 0; i < addressesWithMoonboards.length; i++) {
             address owner = addressesWithMoonboards[i];
@@ -100,6 +105,56 @@ contract MoonBoard {
             }
         }
 
-        return allMoonboards;
+        return applyMetadataToBoards(allMoonboards);
+    }
+
+    function applyMetadataToBoards(
+        Board[] memory boards
+    ) public view returns (BoardWithMetadata[] memory) {
+        BoardWithMetadata[] memory boardsWithMetadata = new BoardWithMetadata[](
+            boards.length
+        );
+        for (uint i = 0; i < boards.length; i++) {
+            Board memory board = boards[i];
+            uint votes = 0;
+            uint pins = 0;
+            for (uint j = 0; j < board.moonpinIds.length; j++) {
+                uint moonpinId = board.moonpinIds[j];
+                votes += MoonPin(moonpinContract).getVotes(moonpinId);
+                pins += MoonPin(moonpinContract).getPins(moonpinId);
+            }
+
+            boardsWithMetadata[i] = BoardWithMetadata({
+                name: board.name,
+                moonpinIds: board.moonpinIds,
+                owner: board.owner,
+                votes: votes,
+                pins: pins
+            });
+        }
+
+        return boardsWithMetadata;
+    }
+
+    function applyMetadataToBoard(
+        Board memory boards
+    ) public view returns (BoardWithMetadata memory) {
+        uint votes = 0;
+        uint pins = 0;
+        for (uint j = 0; j < boards.moonpinIds.length; j++) {
+            uint moonpinId = boards.moonpinIds[j];
+            votes += MoonPin(moonpinContract).getVotes(moonpinId);
+            pins += MoonPin(moonpinContract).getPins(moonpinId);
+        }
+
+        BoardWithMetadata memory boardsWithMetadata = BoardWithMetadata({
+            name: boards.name,
+            moonpinIds: boards.moonpinIds,
+            owner: boards.owner,
+            votes: votes,
+            pins: pins
+        });
+
+        return boardsWithMetadata;
     }
 }

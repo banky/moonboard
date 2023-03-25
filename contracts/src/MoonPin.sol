@@ -9,6 +9,9 @@ contract MoonPin is ERC721URIStorage {
     mapping(uint => uint) public votes;
     mapping(address => mapping(uint => bool)) public voted;
 
+    mapping(uint => uint) public pins;
+    mapping(address => mapping(uint => bool)) public hasPinned;
+
     using Counters for Counters.Counter;
     Counters.Counter private tokenIdCounter;
 
@@ -44,5 +47,23 @@ contract MoonPin is ERC721URIStorage {
 
     function getVoted(address voter, uint tokenId) public view returns (bool) {
         return voted[voter][tokenId];
+    }
+
+    function pin(uint tokenId) public {
+        require(!hasPinned[msg.sender][tokenId], "MoonPin: already pinned");
+
+        pins[tokenId] += 1;
+        hasPinned[msg.sender][tokenId] = true;
+    }
+
+    function unpin(uint tokenId) public {
+        require(hasPinned[msg.sender][tokenId], "MoonPin: has not pinned");
+
+        pins[tokenId] -= 1;
+        hasPinned[msg.sender][tokenId] = false;
+    }
+
+    function getPins(uint tokenId) public view returns (uint) {
+        return pins[tokenId];
     }
 }

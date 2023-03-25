@@ -63,7 +63,7 @@ describe("MoonBoard", function () {
     expect(boards.length).to.equal(3);
   });
 
-  it.only("deletes a moonboard", async () => {
+  it("deletes a moonboard", async () => {
     const { moonBoard, moonPin, owner, otherAccount } = await loadFixture(
       deployMoonboardFixture
     );
@@ -91,5 +91,30 @@ describe("MoonBoard", function () {
     const boards = await moonBoard.getAllMoonboards();
 
     expect(boards.length).to.equal(1);
+  });
+
+  it("votes and pins on a moonboard", async () => {
+    const { moonBoard, moonPin, owner, otherAccount } = await loadFixture(
+      deployMoonboardFixture
+    );
+
+    await moonBoard.createMoonboard("test moonboard", [
+      "ipfs://test-url",
+      "ipfs://test-url2",
+    ]);
+
+    await moonPin.vote(0);
+    await moonPin.pin(0);
+
+    const board = await moonBoard.getMoonboard(owner.address, 0);
+    expect(board.votes).to.equal(1);
+    expect(board.pins).to.equal(1);
+
+    await moonPin.downvote(0);
+    await moonPin.unpin(0);
+
+    const board2 = await moonBoard.getMoonboard(owner.address, 0);
+    expect(board2.votes).to.equal(0);
+    expect(board2.pins).to.equal(0);
   });
 });

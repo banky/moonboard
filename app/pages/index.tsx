@@ -36,7 +36,7 @@ export default function Home() {
 
   let index = 0;
   let prevOwner = allMoonboards[0].owner ?? "";
-  const moonboardsWithIndexes: any[] = [];
+  let moonboardsWithIndexes: any[] = [];
   allMoonboards.forEach((moonboard) => {
     if (moonboard.owner !== prevOwner) {
       prevOwner = moonboard.owner;
@@ -44,6 +44,15 @@ export default function Home() {
     }
     moonboardsWithIndexes.push({ ...moonboard, index });
   });
+
+  // moonboardsWithIndexes = [
+  //   ...moonboardsWithIndexes,
+  //   ...moonboardsWithIndexes,
+  //   ...moonboardsWithIndexes,
+  //   ...moonboardsWithIndexes,
+  //   ...moonboardsWithIndexes,
+  //   ...moonboardsWithIndexes,
+  // ];
 
   const [showDialog, setShowDialog] = useState(false);
   const open = () => setShowDialog(true);
@@ -77,7 +86,7 @@ export default function Home() {
         <Button onClick={open}>Create Moonboard</Button>
       </div>
 
-      <div className="grid sm:grid-cols-1 md:grid-cols-3 mt-16">
+      <div className="grid sm:grid-cols-1 gap-4 md:grid-cols-3 mt-16">
         {moonboardsWithIndexes?.map((moonboard: any, key) => {
           return (
             <div key={key} className="">
