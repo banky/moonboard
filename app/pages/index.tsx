@@ -21,6 +21,7 @@ import { Thumb } from "svg/thumb";
 import { useQuery } from "@tanstack/react-query";
 import { ipfsToUrl } from "helpers/ipfs";
 import Masonry from "react-masonry-css";
+import { formatTripleDigis } from "helpers/formatters";
 
 export default function Home() {
   const { address, isConnecting, isDisconnected } = useAccount();
@@ -44,15 +45,6 @@ export default function Home() {
     }
     moonboardsWithIndexes.push({ ...moonboard, index });
   });
-
-  // moonboardsWithIndexes = [
-  //   ...moonboardsWithIndexes,
-  //   ...moonboardsWithIndexes,
-  //   ...moonboardsWithIndexes,
-  //   ...moonboardsWithIndexes,
-  //   ...moonboardsWithIndexes,
-  //   ...moonboardsWithIndexes,
-  // ];
 
   const [showDialog, setShowDialog] = useState(false);
   const open = () => setShowDialog(true);
@@ -88,17 +80,23 @@ export default function Home() {
 
       <div className="grid sm:grid-cols-1 gap-4 md:grid-cols-2 mt-16">
         {moonboardsWithIndexes?.map((moonboard: any, key) => {
+          const moonpinIds = moonboard.moonpinIds.map((n: BigNumber) =>
+            n.toNumber()
+          );
+          const externalMoonpinIds = moonboard.externalMoonpinIds.map(
+            (n: BigNumber) => n.toNumber()
+          );
+
           return (
             <div key={key} className="">
               <Moonboard
                 title={moonboard.name}
-                votes={moonboard.votes}
-                pins={0}
+                votes={moonboard.votes.toNumber()}
+                pins={moonboard.pins.toNumber()}
                 owner={moonboard.owner}
                 index={moonboard.index}
-                moonpinIds={moonboard.moonpinIds.map((n: BigNumber) =>
-                  n.toNumber()
-                )}
+                moonpinIds={[...moonpinIds, ...externalMoonpinIds]}
+                refetch={refetchMoonboards}
               />
             </div>
           );
@@ -145,6 +143,7 @@ type MoonboardProps = {
   owner: string;
   index: number;
   moonpinIds: number[];
+  refetch: () => Promise<any>;
 };
 const Moonboard = ({
   title,
@@ -153,6 +152,7 @@ const Moonboard = ({
   owner,
   index,
   moonpinIds,
+  refetch,
 }: MoonboardProps) => {
   return (
     <div className="border-2 border-outlines rounded-xl overflow-hidden max-h-[800px]">
@@ -164,25 +164,15 @@ const Moonboard = ({
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <p className="text-white">Votes</p>
-            <h3 className="text-white">
-              {votes.toLocaleString("en-US", {
-                minimumIntegerDigits: 3,
-                useGrouping: false,
-              })}
-            </h3>
+            <h3 className="text-white">{formatTripleDigis(votes)}</h3>
           </div>
           <div className="flex items-center gap-2">
             <p className="text-white">Pins</p>
-            <h3 className="text-white">
-              {pins.toLocaleString("en-US", {
-                minimumIntegerDigits: 3,
-                useGrouping: false,
-              })}
-            </h3>
+            <h3 className="text-white">{formatTripleDigis(pins)}</h3>
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-between mx-8 my-8">
+      <div className="flex items-center justify-between mx-4 my-8">
         <div className=""></div>
         <div className="flex gap-2">
           <p className="">Total items</p>
@@ -195,14 +185,18 @@ const Moonboard = ({
         </div>
       </div>
 
-      <div className="mx-8">
+      <div className="mx-4">
         <Masonry
           breakpointCols={2}
           className="flex w-auto my-8"
           columnClassName="first:pl-0 pl-4"
         >
           {moonpinIds.map((moonpinId) => (
-            <MoonpinCard key={moonpinId} moonpinId={moonpinId} />
+            <MoonpinCard
+              key={moonpinId}
+              moonpinId={moonpinId}
+              onVote={refetch}
+            />
           ))}
         </Masonry>
       </div>
@@ -212,9 +206,10 @@ const Moonboard = ({
 
 type MoonpinCardProps = {
   moonpinId: number;
+  onVote: () => Promise<any>;
 };
 
-const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
+const MoonpinCard = ({ moonpinId, onVote }: MoonpinCardProps) => {
   const pins = 0;
 
   const contractAddress =
@@ -237,6 +232,8 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
     },
   });
 
+  const { address } = useAccount();
+
   const { data: votes, refetch: refetchVotes } = useContractRead({
     address: contractAddress as `0x${string}`,
     abi: MoonpinABI.abi,
@@ -245,23 +242,46 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
   });
   const voteCount = (votes as BigNumber)?.toNumber() ?? 0;
 
+  const { data: voted, refetch: refetchVoted } = useContractRead({
+    address: contractAddress as `0x${string}`,
+    abi: MoonpinABI.abi,
+    functionName: "getVoted",
+    args: [address, moonpinId],
+  });
+  const hasVoted = (voted as boolean | undefined) ?? false;
+
   const { config: voteConfig } = usePrepareContractWrite({
     address: contractAddress as `0x${string}`,
     abi: MoonpinABI.abi,
     functionName: "vote",
     args: [moonpinId],
-    enabled: votes !== undefined && voteCount === 0,
+    enabled: voted !== undefined && hasVoted === false,
   });
   const { writeAsync: vote } = useContractWrite(voteConfig);
 
+  const { config: downvoteConfig } = usePrepareContractWrite({
+    address: contractAddress as `0x${string}`,
+    abi: MoonpinABI.abi,
+    functionName: "downvote",
+    args: [moonpinId],
+    enabled: voted !== undefined && hasVoted === true,
+  });
+  const { writeAsync: downvote } = useContractWrite(downvoteConfig);
+
   const onClickVote = async () => {
-    const sendTransactionResult = await vote?.();
-    await sendTransactionResult?.wait();
+    if (hasVoted) {
+      const sendTransactionResult = await downvote?.();
+      await sendTransactionResult?.wait();
+    } else {
+      const sendTransactionResult = await vote?.();
+      await sendTransactionResult?.wait();
+    }
 
-    refetchVotes();
+    await refetchVotes();
+    await refetchVoted();
+
+    await onVote();
   };
-
-  const hasVoted = voteCount > 0;
 
   return (
     <div className="border-2 border-outlines rounded-2xl relative overflow-hidden mb-4">
@@ -273,21 +293,11 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
         <div className="flex gap-4">
           <div className="flex flex-col">
             <p className="">Votes</p>
-            <h3 className="">
-              {voteCount.toLocaleString("en-US", {
-                minimumIntegerDigits: 3,
-                useGrouping: false,
-              })}
-            </h3>
+            <h3 className="">{formatTripleDigis(voteCount)}</h3>
           </div>
           <div className="flex flex-col">
             <p className="">Pins</p>
-            <h3 className="">
-              {pins.toLocaleString("en-US", {
-                minimumIntegerDigits: 3,
-                useGrouping: false,
-              })}
-            </h3>
+            <h3 className="">{formatTripleDigis(pins)}</h3>
           </div>
         </div>
         <IconButton

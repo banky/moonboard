@@ -147,20 +147,27 @@ const MoonboardSlot = () => {
 
   return (
     <div>
-      {moonboards.map((moonboard, index) => (
-        <div key={index} className="mb-8">
-          <MoonBoard
-            title={moonboard.name}
-            moonpinIds={moonboard.moonpinIds.map((n: BigNumber) =>
-              n.toNumber()
-            )}
-            votes={moonboard.votes.toNumber()}
-            pins={0}
-            onClickDelete={() => onClickDeleteMoonboard(index)}
-            index={index}
-          />
-        </div>
-      ))}
+      {moonboards.map((moonboard, index) => {
+        const moonpinIds = moonboard.moonpinIds.map((n: BigNumber) =>
+          n.toNumber()
+        );
+        const externalMoonpinIds = moonboard.externalMoonpinIds.map(
+          (n: BigNumber) => n.toNumber()
+        );
+
+        return (
+          <div key={index} className="mb-8">
+            <MoonBoard
+              title={moonboard.name}
+              moonpinIds={[...moonpinIds, ...externalMoonpinIds]}
+              votes={moonboard.votes.toNumber()}
+              pins={moonboard.pins.toNumber()}
+              onClickDelete={() => onClickDeleteMoonboard(index)}
+              index={index}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 };

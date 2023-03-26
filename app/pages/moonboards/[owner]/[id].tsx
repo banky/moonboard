@@ -42,13 +42,14 @@ export default function Moonboard() {
 
   const moonboard = data as any;
   const moonpinIds: any[] = moonboard?.moonpinIds ?? [];
-  const numMoonPins = moonpinIds.length ?? 0;
+  const externalMoonpinIds: any[] = moonboard?.externalMoonpinIds ?? [];
+  const allMoonpins = [...moonpinIds, ...externalMoonpinIds];
+
+  const numMoonPins = allMoonpins.length ?? 0;
   const numPins =
     (moonboard?.pins as BigNumber | undefined) ?? BigNumber.from(0);
   const numVotes =
     (moonboard?.votes as BigNumber | undefined) ?? BigNumber.from(0);
-
-  console.log("moonboard", moonboard);
 
   const title = moonboard?.name ?? "";
 
@@ -102,8 +103,12 @@ export default function Moonboard() {
           className="flex w-auto my-8"
           columnClassName="first:pl-0 pl-4"
         >
-          {moonpinIds.map((moonpinId: any) => (
-            <MoonpinCard key={moonpinId} moonpinId={moonpinId} />
+          {allMoonpins.map((moonpinId: any) => (
+            <MoonpinCard
+              key={moonpinId}
+              moonpinId={moonpinId}
+              onVote={() => refetchMoonboard()}
+            />
           ))}
         </Masonry>
       </div>
@@ -113,9 +118,10 @@ export default function Moonboard() {
 
 type MoonpinCardProps = {
   moonpinId: number;
+  onVote: () => Promise<any>;
 };
 
-const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
+const MoonpinCard = ({ moonpinId, onVote }: MoonpinCardProps) => {
   const { address } = useAccount();
   const moonpinContract =
     process.env.NEXT_PUBLIC_MOONPIN_CONTRACT_ADDRESS ?? "";
@@ -214,7 +220,9 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
       await sendTransactionResult?.wait();
     }
 
-    refetchVotes();
+    await refetchVotes();
+    await refetchVoted();
+    await onVote();
   };
 
   const onClickPin = async () => {
@@ -275,9 +283,9 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
         <IconButton
           onClick={onClickVote}
           className={`bg-secondary-brand hover:bg-primary-brand hover:bg-black px-4 rounded-full
-          ${true ? "bg-red-300 hover:bg-red-500" : ""}`}
+          ${hasVoted ? "bg-red-300 hover:bg-red-500" : ""}`}
         >
-          <div className={`${true ? "rotate-180" : ""}`}>
+          <div className={`${hasVoted ? "rotate-180" : ""}`}>
             <Thumb />
           </div>
         </IconButton>
