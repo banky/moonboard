@@ -293,6 +293,7 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
       data.image = ipfsToUrl(data.image);
       return data;
     },
+    enabled: !!tokenUri,
   });
 
   const { data: votes, refetch: refetchVotes } = useContractRead({

@@ -205,6 +205,7 @@ const MoonpinCard = ({ moonpinId, onVote }: MoonpinCardProps) => {
       data.image = ipfsToUrl(data.image);
       return data;
     },
+    enabled: !!tokenUri,
   });
 
   const { address } = useAccount();

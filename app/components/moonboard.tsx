@@ -106,7 +106,7 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
   });
 
   const { data: moonpin } = useQuery({
-    queryKey: ["moonpin", tokenUri],
+    queryKey: ["moonpin", moonpinId],
     queryFn: async () => {
       const url = ipfsToUrl(tokenUri as string);
       const response = await fetch(url);
@@ -114,6 +114,7 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
       data.image = ipfsToUrl(data.image);
       return data;
     },
+    enabled: !!tokenUri,
   });
 
   const { data: votes, refetch: refetchVotes } = useContractRead({

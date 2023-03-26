@@ -144,6 +144,7 @@ const MoonpinCard = ({ moonpinId, boardOwner, onVote }: MoonpinCardProps) => {
       data.image = ipfsToUrl(data.image);
       return data;
     },
+    enabled: !!tokenUri,
   });
 
   const { data: voted, refetch: refetchVoted } = useContractRead({
