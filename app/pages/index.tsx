@@ -42,6 +42,7 @@ export default function Home() {
       index = 0;
     }
     moonboardsWithIndexes.push({ ...moonboard, index });
+    index += 1;
   });
 
   const [showDialog, setShowDialog] = useState(false);
