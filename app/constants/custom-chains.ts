@@ -24,28 +24,3 @@ export const scrollAlpha: Chain = {
     },
   },
 };
-
-export const polygonZkevm: Chain = {
-  name: "Polygon ZK-EVM",
-  id: 1442,
-  network: "Polygon ZK-EVM",
-  nativeCurrency: {
-    name: "ETH",
-    symbol: "ETH",
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: ["https://rpc.public.zkevm-test.net"],
-    },
-    public: {
-      http: ["https://rpc.public.zkevm-test.net"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Blockscout",
-      url: "https://explorer.public.zkevm-test.net",
-    },
-  },
-};

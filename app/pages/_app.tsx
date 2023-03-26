@@ -9,7 +9,13 @@ import {
 import { AppProps } from "next/app";
 import dynamic from "next/dynamic";
 import { Header } from "components/header";
-import { mainnet, hardhat, goerli, polygon } from "wagmi/chains";
+import {
+  mainnet,
+  hardhat,
+  goerli,
+  polygon,
+  polygonZkEvmTestnet,
+} from "wagmi/chains";
 import { Montserrat } from "next/font/google";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { scrollAlpha } from "constants/custom-chains";
@@ -21,7 +27,7 @@ const getChains = (): Chain[] => {
   if (process.env.NEXT_PUBLIC_ENVIRONMENT === "localhost") {
     return [hardhat];
   } else {
-    return [scrollAlpha, polygon];
+    return [scrollAlpha, polygonZkEvmTestnet];
   }
 };
 
