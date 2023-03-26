@@ -278,8 +278,12 @@ const MoonpinCard = ({ moonpinId, onVote }: MoonpinCardProps) => {
         </div>
         <IconButton
           onClick={onClickVote}
-          className={`bg-secondary-brand hover:bg-primary-brand hover:bg-black px-4 rounded-full
-          ${hasVoted ? "bg-red-300 hover:bg-red-500" : ""}`}
+          className={`hover:bg-black px-4 rounded-full 
+          ${
+            hasVoted
+              ? "bg-red-300 enabled:hover:bg-red-500"
+              : "bg-secondary-brand hover:bg-primary-brand"
+          }`}
         >
           <div className={`${hasVoted ? "rotate-180" : ""}`}>
             <Thumb />
