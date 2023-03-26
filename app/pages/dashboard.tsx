@@ -20,22 +20,17 @@ import { Thumb } from "svg/thumb";
 import { CreateMoonboardTypeModal } from "components/create-moonboard-type-modal";
 import { contracts } from "constants/contracts";
 import Head from "next/head";
+import { Select } from "components/select";
 
 export default function Dashboard() {
-  const [slot, setSlot] = useState<
-    "yourPins" | "moonPins" | "moonBoards" | "settings"
-  >("moonBoards");
+  const [slot, setSlot] = useState<"moonBoards" | "settings">("moonBoards");
 
   const getSlot = () => {
     switch (slot) {
-      case "yourPins":
-        return null;
-      case "moonPins":
-        return null;
       case "moonBoards":
         return <MoonboardSlot />;
       case "settings":
-        return null;
+        return <SettingsSlot />;
     }
   };
 
@@ -104,8 +99,8 @@ export default function Dashboard() {
 }
 
 type TabBarItemProps = {
-  currentSlot: "yourPins" | "moonPins" | "moonBoards" | "settings";
-  slot: "yourPins" | "moonPins" | "moonBoards" | "settings";
+  currentSlot: "moonBoards" | "settings";
+  slot: "moonBoards" | "settings";
   onClick: () => void;
   children: React.ReactNode;
 };
@@ -359,6 +354,16 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
           </div>
         </IconButton>
       </div>
+    </div>
+  );
+};
+
+const SettingsSlot = () => {
+  return (
+    <div className="flex items-center gap-4">
+      <h3>Payout method</h3>
+      <Select options={["ETH", "APE"]} />
+      <Button>Confirm</Button>
     </div>
   );
 };
