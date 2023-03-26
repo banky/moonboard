@@ -106,7 +106,7 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
   });
 
   const { data: moonpin } = useQuery({
-    queryKey: ["moonpin", moonpinId],
+    queryKey: ["moonpin", tokenUri],
     queryFn: async () => {
       const url = ipfsToUrl(tokenUri as string);
       const response = await fetch(url);
