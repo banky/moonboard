@@ -38,7 +38,8 @@ contract MoonBoard {
         string memory name,
         string[] memory tokenURIs
     ) public payable returns (uint) {
-        require(msg.value >= createBoardFee, "Not enough ETH sent to create");
+        uint fee = createBoardFee + (pinFee * tokenURIs.length);
+        require(msg.value >= fee, "Not enough ETH sent to create");
         Board memory board = Board({
             name: name,
             moonpinIds: new uint[](tokenURIs.length),

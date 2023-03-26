@@ -24,6 +24,16 @@ export const PinSingleModal = ({
   const moonboardContract =
     process.env.NEXT_PUBLIC_MOONBOARD_CONTRACT_ADDRESS ?? "";
   const { address } = useAccount();
+
+  const { data: pinFee, refetch: refetchFee } = useContractRead({
+    address: moonboardContract as `0x${string}`,
+    abi: MoonBoardABI.abi,
+    functionName: "pinFee",
+    args: [],
+  });
+
+  console.log("pinFee", pinFee);
+
   const { data, refetch: refetchMoonboards } = useContractRead({
     address: moonboardContract as `0x${string}`,
     abi: MoonBoardABI.abi,

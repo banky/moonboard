@@ -18,12 +18,10 @@ import {
   useContractWrite,
   useContractRead,
 } from "wagmi";
+import { BigNumber } from "ethers";
+import { CreateMoonboardModal } from "components/create-moonboard-modal";
 
 const fileTypes = ["JPG", "JPEG", "PNG", "GIF"];
-
-const nftStorageClient = new NFTStorage({
-  token: process.env.NEXT_PUBLIC_NFT_STORAGE_TOKEN ?? "",
-});
 
 export default function CreateMoonboard() {
   const [files, setFiles] = useState<File[]>([]);
@@ -127,7 +125,7 @@ type PublishProps = {
   setPageState: (pageState: "upload" | "publish") => void;
 };
 
-type MoonPin = {
+export type MoonPin = {
   name: string;
   imageFile: File;
   selected: boolean;
@@ -138,9 +136,6 @@ const Publish = ({ files, setPageState }: PublishProps) => {
   const [moonboardName, setMoonboardName] = useState("");
   const showPlaceholder = !enteringTitle && moonboardName === "";
 
-  const [loadingState, setLoadingState] = useState<"initial" | "ipfs" | "mint">(
-    "initial"
-  );
   const [moonPins, setMoonPins] = useState<MoonPin[]>(
     files.map((file) => ({
       name: "",
@@ -149,57 +144,7 @@ const Publish = ({ files, setPageState }: PublishProps) => {
     }))
   );
 
-  const contractAddress =
-    process.env.NEXT_PUBLIC_MOONBOARD_CONTRACT_ADDRESS ?? "";
-  const { address } = useAccount();
-
-  const { writeAsync: onCreateMoonboard } = useContractWrite({
-    mode: "recklesslyUnprepared",
-    address: contractAddress as `0x${string}`,
-    abi: MoonBoardABI.abi,
-    functionName: "createMoonboard(string,string[])",
-  });
-
-  const { refetch: refetchMoonboards } = useContractRead({
-    address: contractAddress as `0x${string}`,
-    abi: MoonBoardABI.abi,
-    functionName: "getMoonboards",
-    args: [address],
-  });
-
-  const onSubmit = async () => {
-    setLoadingState("ipfs");
-
-    const metadata = await Promise.all(
-      moonPins.map(async (moonPin) => {
-        if (moonPin.selected) {
-          return nftStorageClient.store({
-            name: moonPin.name,
-            description: "",
-            image: moonPin.imageFile,
-          });
-        }
-      })
-    );
-    const tokenUris = metadata.map((token) => token?.url ?? "");
-
-    setLoadingState("mint");
-
-    const sendTransactionResult = await onCreateMoonboard?.({
-      recklesslySetUnpreparedArgs: [moonboardName, tokenUris],
-    });
-    await sendTransactionResult?.wait();
-
-    const moonboards = await refetchMoonboards();
-
-    setLoadingState("initial");
-  };
-
-  const loadingStateString = {
-    ipfs: "Uploading to IPFS",
-    mint: "Confirm in wallet...",
-    initial: "Publish Moonboard",
-  }[loadingState];
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <main>
@@ -226,12 +171,7 @@ const Publish = ({ files, setPageState }: PublishProps) => {
       <div className="flex justify-between my-32 max-w-6xl mx-auto">
         <Button onClick={() => setPageState("upload")}>Back</Button>
 
-        <Button
-          onClick={onSubmit}
-          disabled={!["initial"].includes(loadingState)}
-        >
-          {loadingStateString}
-        </Button>
+        <Button onClick={() => setIsModalOpen(true)}>Publish Moonboard</Button>
       </div>
 
       <div className="max-w-6xl mx-auto">
@@ -287,6 +227,13 @@ const Publish = ({ files, setPageState }: PublishProps) => {
           ))}
         </Masonry>
       </div>
+
+      <CreateMoonboardModal
+        isOpen={isModalOpen}
+        close={() => setIsModalOpen(false)}
+        name={moonboardName}
+        moonPins={moonPins}
+      />
     </main>
   );
 };
