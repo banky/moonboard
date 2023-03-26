@@ -22,6 +22,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ipfsToUrl } from "helpers/ipfs";
 import Masonry from "react-masonry-css";
 import { formatTripleDigis } from "helpers/formatters";
+import { CreateMoonboardTypeModal } from "components/create-moonboard-type-modal";
 
 export default function Home() {
   const { address, isConnecting, isDisconnected } = useAccount();
@@ -103,35 +104,7 @@ export default function Home() {
         })}
       </div>
 
-      <Modal isOpen={showDialog} onDismiss={close}>
-        <div className="m-4">
-          <div className="flex justify-between">
-            <div>
-              <h3>Create Moonboard</h3>
-              <p className="">
-                Choose what content you want to put into your board
-              </p>
-            </div>
-
-            <IconButton className="" onClick={close}>
-              <Close />
-            </IconButton>
-          </div>
-
-          <div className="h-0.5 -mx-4 bg-outlines my-4" />
-
-          <div className="grid grid-cols-2 gap-4">
-            <Link href="/create-moonboard">
-              <ModalOption>From uploaded images</ModalOption>
-            </Link>
-            <ModalOption disabled>
-              From another moonboard (coming soon)
-            </ModalOption>
-            <ModalOption disabled>From your wallet (coming soon)</ModalOption>
-            <ModalOption disabled>From your pins (coming soon)</ModalOption>
-          </div>
-        </div>
-      </Modal>
+      <CreateMoonboardTypeModal showDialog={showDialog} close={close} />
     </main>
   );
 }

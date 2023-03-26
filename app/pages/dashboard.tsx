@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ipfsToUrl } from "helpers/ipfs";
 import { IconButton } from "components/icon-button";
 import { Thumb } from "svg/thumb";
+import { CreateMoonboardTypeModal } from "components/create-moonboard-type-modal";
 
 export default function Dashboard() {
   const [slot, setSlot] = useState<
@@ -34,6 +35,10 @@ export default function Dashboard() {
         return null;
     }
   };
+
+  const [showDialog, setShowDialog] = useState(false);
+  const open = () => setShowDialog(true);
+  const close = () => setShowDialog(false);
 
   return (
     <main className="max-w-6xl mx-auto">
@@ -80,12 +85,12 @@ export default function Dashboard() {
               </FilterTab>
             </Filter>
           </div>
-          <Link href="/create-moonboard">
-            <Button>Create Moonboard</Button>
-          </Link>
+          <Button onClick={open}>Create Moonboard</Button>
         </div>
       </div>
       <div className="max-w-6xl mx-auto">{getSlot()}</div>
+
+      <CreateMoonboardTypeModal showDialog={showDialog} close={close} />
     </main>
   );
 }

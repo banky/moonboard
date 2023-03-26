@@ -36,10 +36,6 @@ export default function Moonboard() {
     args: [owner, id],
   });
 
-  const [showDialog, setShowDialog] = useState(false);
-  const open = () => setShowDialog(true);
-  const close = () => setShowDialog(false);
-
   const moonboard = data as any;
   const moonpinIds: any[] = moonboard?.moonpinIds ?? [];
   const externalMoonpinIds: any[] = moonboard?.externalMoonpinIds ?? [];
@@ -58,6 +54,7 @@ export default function Moonboard() {
       <h1 className="m-12 text-center">{title}</h1>
 
       <div className="flex items-center justify-between">
+        <div></div>
         <Filter>
           <FilterTab filter="pins" isDefault>
             <div className="flex items-center gap-2">
@@ -78,7 +75,6 @@ export default function Moonboard() {
             </div>
           </FilterTab>
         </Filter>
-        <Button onClick={open}>Create Moonboard</Button>
       </div>
 
       <div className="flex justify-between my-10 mx-auto">

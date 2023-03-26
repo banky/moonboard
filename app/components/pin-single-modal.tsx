@@ -165,6 +165,10 @@ const Payment = ({ onClickPayment }: PaymentProps) => {
       <Button onClick={onClickPayment} className="my-8">
         Continue
       </Button>
+      <p className="">
+        All pin fees are sent to the pin creator (75%) and the mooner who
+        curated this board (25%)
+      </p>
     </div>
   );
 };
