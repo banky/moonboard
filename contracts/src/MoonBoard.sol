@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 import "./MoonPin.sol";
-import "hardhat/console.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 
 contract MoonBoard {
     address public moonpinContract;
@@ -10,6 +10,10 @@ contract MoonBoard {
     address immutable deployoor = msg.sender;
     uint public creatorPinCut = 75;
     uint public denominator = 100;
+    address public constant APE = 0x4d224452801ACEd8B2F0aebE155379bb5D594381;
+    address public constant UNISWAP_ROUTER =
+        0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
+    IUniswapV2Router02 public uniswapRouter;
 
     struct Board {
         string name;
@@ -31,9 +35,11 @@ contract MoonBoard {
     mapping(address => bool) public hasMoonboard;
     address[] public addressesWithMoonboards;
     uint public numMoonboards;
+    mapping(address => bool) public payoutApecoin;
 
     constructor(address _moonpinContract) {
         moonpinContract = _moonpinContract;
+        uniswapRouter = IUniswapV2Router02(UNISWAP_ROUTER);
     }
 
     function createMoonboard(
@@ -126,8 +132,17 @@ contract MoonBoard {
         address creator = MoonPin(moonpinContract).ownerOf(sourceMonnpinId);
         uint creatorCut = (pinFee * creatorPinCut) / denominator;
 
-        payable(creator).transfer(creatorCut);
-        payable(sourceBoardOwner).transfer(msg.value - creatorCut);
+        if (payoutApecoin[creator]) {
+            swapEthForApecoin(creatorCut, creator);
+        } else {
+            payable(creator).transfer(creatorCut);
+        }
+
+        if (payoutApecoin[sourceBoardOwner]) {
+            swapEthForApecoin(msg.value - creatorCut, sourceBoardOwner);
+        } else {
+            payable(sourceBoardOwner).transfer(msg.value - creatorCut);
+        }
 
         address pinner = msg.sender;
         Board storage targetBoard = moonboards[pinner][targetBoardIndex];
@@ -212,5 +227,25 @@ contract MoonBoard {
         });
 
         return boardsWithMetadata;
+    }
+
+    function swapEthForApecoin(uint amount, address receiver) internal {
+        require(amount > 0, "Amount must be greater than 0");
+
+        uint deadline = block.timestamp + 5;
+        uniswapRouter.swapExactETHForTokens{value: amount}(
+            amount,
+            swapPath(),
+            receiver,
+            deadline
+        );
+    }
+
+    function swapPath() private view returns (address[] memory) {
+        address[] memory path = new address[](2);
+        path[0] = uniswapRouter.WETH();
+        path[1] = APE;
+
+        return path;
     }
 }
