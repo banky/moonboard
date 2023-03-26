@@ -5,16 +5,11 @@ import {
   useContractWrite,
   usePrepareContractWrite,
 } from "wagmi";
-import { Input } from "components/input";
 import { FilterTab, Filter } from "components/filter";
 import { Button } from "components/button";
-import { Star } from "svg/star";
 import { useState } from "react";
-import { Modal } from "components/modal";
 import { IconButton } from "components/icon-button";
-import { ModalOption } from "components/modal-option";
 import Link from "next/link";
-import { Close } from "svg/close";
 import { Sort } from "svg/sort";
 import { MoonBoardABI, MoonpinABI } from "contracts";
 import { BigNumber } from "ethers";
@@ -25,6 +20,7 @@ import Masonry from "react-masonry-css";
 import { formatTripleDigis } from "helpers/formatters";
 import { CreateMoonboardTypeModal } from "components/create-moonboard-type-modal";
 import { contracts } from "constants/contracts";
+import Head from "next/head";
 
 export default function Home() {
   const chainId = useChainId();
@@ -53,60 +49,65 @@ export default function Home() {
   const close = () => setShowDialog(false);
 
   return (
-    <main className="max-w-6xl mx-auto">
-      <h1 className="m-12 text-center">Explore Moonboards</h1>
+    <>
+      <Head>
+        <title>Moonboard</title>
+      </Head>
+      <main className="max-w-6xl mx-auto">
+        <h1 className="m-12 text-center">Explore Moonboards</h1>
 
-      <div className="flex items-center justify-between">
-        <Filter>
-          <FilterTab filter="pins" isDefault>
-            <div className="flex items-center gap-2">
-              <p>Most Pins</p>
-              <Sort />
-            </div>
-          </FilterTab>
-          <FilterTab filter="votes">
-            <div className="flex items-center gap-2">
-              <p>Most Votes</p>
-              <Sort />
-            </div>
-          </FilterTab>
-          <FilterTab filter="latest">
-            <div className="flex items-center gap-2">
-              <p>Latest</p>
-              <Sort />
-            </div>
-          </FilterTab>
-        </Filter>
-        <Button onClick={open}>Create Moonboard</Button>
-      </div>
+        <div className="flex items-center justify-between">
+          <Filter>
+            <FilterTab filter="pins" isDefault>
+              <div className="flex items-center gap-2">
+                <p>Most Pins</p>
+                <Sort />
+              </div>
+            </FilterTab>
+            <FilterTab filter="votes">
+              <div className="flex items-center gap-2">
+                <p>Most Votes</p>
+                <Sort />
+              </div>
+            </FilterTab>
+            <FilterTab filter="latest">
+              <div className="flex items-center gap-2">
+                <p>Latest</p>
+                <Sort />
+              </div>
+            </FilterTab>
+          </Filter>
+          <Button onClick={open}>Create Moonboard</Button>
+        </div>
 
-      <div className="grid sm:grid-cols-1 gap-4 md:grid-cols-2 mt-16">
-        {moonboardsWithIndexes?.map((moonboard: any, key) => {
-          const moonpinIds = moonboard.moonpinIds.map((n: BigNumber) =>
-            n.toNumber()
-          );
-          const externalMoonpinIds = moonboard.externalMoonpinIds.map(
-            (n: BigNumber) => n.toNumber()
-          );
+        <div className="grid sm:grid-cols-1 gap-4 md:grid-cols-2 mt-16">
+          {moonboardsWithIndexes?.map((moonboard: any, key) => {
+            const moonpinIds = moonboard.moonpinIds.map((n: BigNumber) =>
+              n.toNumber()
+            );
+            const externalMoonpinIds = moonboard.externalMoonpinIds.map(
+              (n: BigNumber) => n.toNumber()
+            );
 
-          return (
-            <div key={key} className="">
-              <Moonboard
-                title={moonboard.name}
-                votes={moonboard.votes.toNumber()}
-                pins={moonboard.pins.toNumber()}
-                owner={moonboard.owner}
-                index={moonboard.index}
-                moonpinIds={[...moonpinIds, ...externalMoonpinIds]}
-                refetch={refetchMoonboards}
-              />
-            </div>
-          );
-        })}
-      </div>
+            return (
+              <div key={key} className="">
+                <Moonboard
+                  title={moonboard.name}
+                  votes={moonboard.votes.toNumber()}
+                  pins={moonboard.pins.toNumber()}
+                  owner={moonboard.owner}
+                  index={moonboard.index}
+                  moonpinIds={[...moonpinIds, ...externalMoonpinIds]}
+                  refetch={refetchMoonboards}
+                />
+              </div>
+            );
+          })}
+        </div>
 
-      <CreateMoonboardTypeModal showDialog={showDialog} close={close} />
-    </main>
+        <CreateMoonboardTypeModal showDialog={showDialog} close={close} />
+      </main>
+    </>
   );
 }
 

@@ -8,6 +8,7 @@ import Masonry from "react-masonry-css";
 import { Check } from "svg/check";
 import { PlusCross } from "svg/plus-cross";
 import { CreateMoonboardModal } from "components/create-moonboard-modal";
+import Head from "next/head";
 
 const fileTypes = ["JPG", "JPEG", "PNG", "GIF"];
 
@@ -37,72 +38,77 @@ const Upload = ({ files, setFiles, setPageState }: UploadProps) => {
   };
 
   return (
-    <main>
-      <h1 className="m-12 text-center">Create Moonboard</h1>
+    <>
+      <Head>
+        <title>Create Moonboard</title>
+      </Head>
+      <main>
+        <h1 className="m-12 text-center">Create Moonboard</h1>
 
-      <div className="flex justify-between mb-16 max-w-6xl mx-auto">
-        <NavigationButton href="/">Back</NavigationButton>
+        <div className="flex justify-between mb-16 max-w-6xl mx-auto">
+          <NavigationButton href="/">Back</NavigationButton>
 
-        <Button
-          onClick={() => {
-            setPageState("publish");
-          }}
-        >
-          Continue
-        </Button>
-      </div>
-
-      <div className="border-2 border-outlines rounded-md max-w-6xl mx-auto">
-        <div className="m-4">
-          <h3>Upload Pictures to create you Moonboard</h3>
-          <p className="">
-            Choose what content you want to put into your board
-          </p>
+          <Button
+            onClick={() => {
+              setPageState("publish");
+            }}
+          >
+            Continue
+          </Button>
         </div>
 
-        <div className="h-0.5 bg-outlines my-4" />
+        <div className="border-2 border-outlines rounded-md max-w-6xl mx-auto">
+          <div className="m-4">
+            <h3>Upload Pictures to create you Moonboard</h3>
+            <p className="">
+              Choose what content you want to put into your board
+            </p>
+          </div>
 
-        <div className="w-3/4 mx-auto mb-8 flex gap-4 items-center">
-          <div className="grow">
-            <FileUploader
-              handleChange={handleChange}
-              name="file"
-              types={fileTypes}
-              multiple
-            >
-              <div className="border-outlines border-2 border-dashed min-h-[128px] py-4 rounded-md flex items-center justify-center">
-                {files.length === 0 ? (
-                  <p className="my-auto">Drag and drop</p>
-                ) : (
-                  <div className="flex flex-col">
-                    {files.map((file) => (
-                      <p key={file.name} className="">
-                        {file.name}
-                      </p>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </FileUploader>
+          <div className="h-0.5 bg-outlines my-4" />
+
+          <div className="w-3/4 mx-auto mb-8 flex gap-4 items-center">
+            <div className="grow">
+              <FileUploader
+                handleChange={handleChange}
+                name="file"
+                types={fileTypes}
+                multiple
+              >
+                <div className="border-outlines border-2 border-dashed min-h-[128px] py-4 rounded-md flex items-center justify-center">
+                  {files.length === 0 ? (
+                    <p className="my-auto">Drag and drop</p>
+                  ) : (
+                    <div className="flex flex-col">
+                      {files.map((file) => (
+                        <p key={file.name} className="">
+                          {file.name}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </FileUploader>
+            </div>
+          </div>
+
+          <div className="w-3/4 mx-auto mb-8">
+            <Checkbox
+              id="my-pictures"
+              checked={myPictures}
+              label="These pictures are mine"
+              onChange={(e) => setMyPictures(e.target.checked)}
+            />
+            <Checkbox
+              id="community-guidelines"
+              checked={communityGuidelines}
+              label="I have read community guidelines"
+              onChange={(e) => setCommunityGuidelines(e.target.checked)}
+            />
           </div>
         </div>
-
-        <div className="w-3/4 mx-auto mb-8">
-          <Checkbox
-            id="my-pictures"
-            checked={myPictures}
-            label="These pictures are mine"
-            onChange={(e) => setMyPictures(e.target.checked)}
-          />
-          <Checkbox
-            id="community-guidelines"
-            checked={communityGuidelines}
-            label="I have read community guidelines"
-            onChange={(e) => setCommunityGuidelines(e.target.checked)}
-          />
-        </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 };
 

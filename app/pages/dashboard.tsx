@@ -19,6 +19,7 @@ import { IconButton } from "components/icon-button";
 import { Thumb } from "svg/thumb";
 import { CreateMoonboardTypeModal } from "components/create-moonboard-type-modal";
 import { contracts } from "constants/contracts";
+import Head from "next/head";
 
 export default function Dashboard() {
   const [slot, setSlot] = useState<
@@ -43,57 +44,62 @@ export default function Dashboard() {
   const close = () => setShowDialog(false);
 
   return (
-    <main className="max-w-6xl mx-auto">
-      <h1 className="my-12 text-center">Dashboard</h1>
+    <>
+      <Head>
+        <title>Dashboard</title>
+      </Head>
+      <main className="max-w-6xl mx-auto">
+        <h1 className="my-12 text-center">Dashboard</h1>
 
-      <div className="flex justify-between mb-16">
-        <div className="flex gap-8">
-          <TabBarItem
-            currentSlot={slot}
-            slot="moonBoards"
-            onClick={() => setSlot("moonBoards")}
-          >
-            Moonboards
-          </TabBarItem>
-          <TabBarItem
-            currentSlot={slot}
-            slot="settings"
-            onClick={() => setSlot("settings")}
-          >
-            Settings
-          </TabBarItem>
-        </div>
-
-        <div className="flex gap-4">
-          <div className="flex items-center gap-4 h-fit">
-            <Filter>
-              <FilterTab filter="pins" isDefault>
-                <div className="flex items-center gap-2">
-                  <p>Most Pins</p>
-                  <Sort />
-                </div>
-              </FilterTab>
-              <FilterTab filter="votes">
-                <div className="flex items-center gap-2">
-                  <p>Most Votes</p>
-                  <Sort />
-                </div>
-              </FilterTab>
-              <FilterTab filter="latest">
-                <div className="flex items-center gap-2">
-                  <p>Latest</p>
-                  <Sort />
-                </div>
-              </FilterTab>
-            </Filter>
+        <div className="flex justify-between mb-16">
+          <div className="flex gap-8">
+            <TabBarItem
+              currentSlot={slot}
+              slot="moonBoards"
+              onClick={() => setSlot("moonBoards")}
+            >
+              Moonboards
+            </TabBarItem>
+            <TabBarItem
+              currentSlot={slot}
+              slot="settings"
+              onClick={() => setSlot("settings")}
+            >
+              Settings
+            </TabBarItem>
           </div>
-          <Button onClick={open}>Create Moonboard</Button>
-        </div>
-      </div>
-      <div className="max-w-6xl mx-auto">{getSlot()}</div>
 
-      <CreateMoonboardTypeModal showDialog={showDialog} close={close} />
-    </main>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-4 h-fit">
+              <Filter>
+                <FilterTab filter="pins" isDefault>
+                  <div className="flex items-center gap-2">
+                    <p>Most Pins</p>
+                    <Sort />
+                  </div>
+                </FilterTab>
+                <FilterTab filter="votes">
+                  <div className="flex items-center gap-2">
+                    <p>Most Votes</p>
+                    <Sort />
+                  </div>
+                </FilterTab>
+                <FilterTab filter="latest">
+                  <div className="flex items-center gap-2">
+                    <p>Latest</p>
+                    <Sort />
+                  </div>
+                </FilterTab>
+              </Filter>
+            </div>
+            <Button onClick={open}>Create Moonboard</Button>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto">{getSlot()}</div>
+
+        <CreateMoonboardTypeModal showDialog={showDialog} close={close} />
+      </main>
+    </>
   );
 }
 

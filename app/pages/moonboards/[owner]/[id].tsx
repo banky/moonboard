@@ -7,6 +7,7 @@ import { MoonBoardABI, MoonpinABI } from "contracts";
 import { BigNumber } from "ethers";
 import { formatTripleDigis } from "helpers/formatters";
 import { ipfsToUrl } from "helpers/ipfs";
+import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -49,66 +50,71 @@ export default function Moonboard() {
   const title = moonboard?.name ?? "";
 
   return (
-    <main className="max-w-6xl mx-auto">
-      <h1 className="m-12 text-center">{title}</h1>
+    <>
+      <Head>
+        <title>{title}</title>
+      </Head>
+      <main className="max-w-6xl mx-auto">
+        <h1 className="m-12 text-center">{title}</h1>
 
-      <div className="flex items-center justify-between">
-        <div></div>
-        <Filter>
-          <FilterTab filter="pins" isDefault>
-            <div className="flex items-center gap-2">
-              <p>Most Pins</p>
-              <Sort />
-            </div>
-          </FilterTab>
-          <FilterTab filter="votes">
-            <div className="flex items-center gap-2">
-              <p>Most Votes</p>
-              <Sort />
-            </div>
-          </FilterTab>
-          <FilterTab filter="latest">
-            <div className="flex items-center gap-2">
-              <p>Latest</p>
-              <Sort />
-            </div>
-          </FilterTab>
-        </Filter>
-      </div>
-
-      <div className="flex justify-between my-10 mx-auto">
-        <div className="flex gap-4">
-          <h3 className="font-bold">Created by:</h3>
-          <p className="inline">{owner}</p>
+        <div className="flex items-center justify-between">
+          <div></div>
+          <Filter>
+            <FilterTab filter="pins" isDefault>
+              <div className="flex items-center gap-2">
+                <p>Most Pins</p>
+                <Sort />
+              </div>
+            </FilterTab>
+            <FilterTab filter="votes">
+              <div className="flex items-center gap-2">
+                <p>Most Votes</p>
+                <Sort />
+              </div>
+            </FilterTab>
+            <FilterTab filter="latest">
+              <div className="flex items-center gap-2">
+                <p>Latest</p>
+                <Sort />
+              </div>
+            </FilterTab>
+          </Filter>
         </div>
 
-        <div className="flex gap-2">
-          <p className="text-outlines">Votes</p>
-          <h3>{formatTripleDigis(numVotes.toNumber())}</h3>
-          <p className="text-outlines">Pins</p>
-          <h3>{formatTripleDigis(numPins.toNumber())}</h3>
-          <p className="text-outlines">Items</p>
-          <h3>{formatTripleDigis(numMoonPins)}</h3>
-        </div>
-      </div>
+        <div className="flex justify-between my-10 mx-auto">
+          <div className="flex gap-4">
+            <h3 className="font-bold">Created by:</h3>
+            <p className="inline">{owner}</p>
+          </div>
 
-      <div className="">
-        <Masonry
-          breakpointCols={4}
-          className="flex w-auto my-8"
-          columnClassName="first:pl-0 pl-4"
-        >
-          {allMoonpins.map((moonpinId: any) => (
-            <MoonpinCard
-              key={moonpinId}
-              moonpinId={moonpinId}
-              onVote={() => refetchMoonboard()}
-              boardOwner={moonboard?.owner ?? ""}
-            />
-          ))}
-        </Masonry>
-      </div>
-    </main>
+          <div className="flex gap-2">
+            <p className="text-outlines">Votes</p>
+            <h3>{formatTripleDigis(numVotes.toNumber())}</h3>
+            <p className="text-outlines">Pins</p>
+            <h3>{formatTripleDigis(numPins.toNumber())}</h3>
+            <p className="text-outlines">Items</p>
+            <h3>{formatTripleDigis(numMoonPins)}</h3>
+          </div>
+        </div>
+
+        <div className="">
+          <Masonry
+            breakpointCols={4}
+            className="flex w-auto my-8"
+            columnClassName="first:pl-0 pl-4"
+          >
+            {allMoonpins.map((moonpinId: any) => (
+              <MoonpinCard
+                key={moonpinId}
+                moonpinId={moonpinId}
+                onVote={() => refetchMoonboard()}
+                boardOwner={moonboard?.owner ?? ""}
+              />
+            ))}
+          </Masonry>
+        </div>
+      </main>
+    </>
   );
 }
 
