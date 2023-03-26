@@ -2,13 +2,19 @@ import { Close } from "svg/close";
 import { IconButton } from "./icon-button";
 import { Modal } from "./modal";
 import Image from "next/image";
-import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import {
+  useAccount,
+  useChainId,
+  useContractRead,
+  useContractWrite,
+} from "wagmi";
 import { MoonBoardABI } from "contracts";
 import { BigNumber, ethers } from "ethers";
 import { Button } from "./button";
 import { useState } from "react";
 import { MoonPin } from "pages/create-moonboard";
 import { NFTStorage } from "nft.storage";
+import { contracts } from "constants/contracts";
 
 const nftStorageClient = new NFTStorage({
   token: process.env.NEXT_PUBLIC_NFT_STORAGE_TOKEN ?? "",
@@ -26,8 +32,8 @@ export const CreateMoonboardModal = ({
   name,
   moonPins,
 }: CreateMoonboardModalProps) => {
-  const contractAddress =
-    process.env.NEXT_PUBLIC_MOONBOARD_CONTRACT_ADDRESS ?? "";
+  const chainId = useChainId();
+  const contractAddress = contracts[chainId].moonboardContract;
   const { address } = useAccount();
 
   const { data: createBoardFeeResult } = useContractRead({

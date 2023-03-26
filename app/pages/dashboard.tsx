@@ -5,6 +5,7 @@ import { Sort } from "svg/sort";
 import { useState } from "react";
 import {
   useAccount,
+  useChainId,
   useContractRead,
   useContractWrite,
   usePrepareContractWrite,
@@ -17,6 +18,7 @@ import { ipfsToUrl } from "helpers/ipfs";
 import { IconButton } from "components/icon-button";
 import { Thumb } from "svg/thumb";
 import { CreateMoonboardTypeModal } from "components/create-moonboard-type-modal";
+import { contracts } from "constants/contracts";
 
 export default function Dashboard() {
   const [slot, setSlot] = useState<
@@ -122,8 +124,8 @@ const TabBarItem = ({
 };
 
 const MoonboardSlot = () => {
-  const contractAddress =
-    process.env.NEXT_PUBLIC_MOONBOARD_CONTRACT_ADDRESS ?? "";
+  const chainId = useChainId();
+  const contractAddress = contracts[chainId].moonboardContract;
   const { address } = useAccount();
 
   const { data, refetch: refetchMoonboards } = useContractRead({
@@ -267,8 +269,8 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
   // const votes = 0;
   const pins = 0;
 
-  const contractAddress =
-    process.env.NEXT_PUBLIC_MOONPIN_CONTRACT_ADDRESS ?? "";
+  const chainId = useChainId();
+  const contractAddress = contracts[chainId].moonpinContract;
   const { data: tokenUri, refetch: refetchMoonboards } = useContractRead({
     address: contractAddress as `0x${string}`,
     abi: MoonpinABI.abi,

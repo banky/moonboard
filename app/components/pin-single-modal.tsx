@@ -6,6 +6,7 @@ import { Button } from "./button";
 import { Select } from "./select";
 import {
   useAccount,
+  useChainId,
   useContractRead,
   useContractWrite,
   usePrepareContractWrite,
@@ -14,6 +15,7 @@ import { MoonBoardABI } from "contracts";
 import { useState } from "react";
 import { NavigationButton } from "./navigation-button";
 import { BigNumber } from "ethers";
+import { contracts } from "constants/contracts";
 
 type PinSingleModalProps = {
   isOpen: boolean;
@@ -31,8 +33,8 @@ export const PinSingleModal = ({
   moonpinId,
   boardOwner,
 }: PinSingleModalProps) => {
-  const moonboardContract =
-    process.env.NEXT_PUBLIC_MOONBOARD_CONTRACT_ADDRESS ?? "";
+  const chainId = useChainId();
+  const moonboardContract = contracts[chainId].moonboardContract;
   const { address } = useAccount();
 
   const { data: pinFeeResult, refetch: refetchFee } = useContractRead({

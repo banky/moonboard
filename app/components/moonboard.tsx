@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { contracts } from "constants/contracts";
 import { MoonpinABI } from "contracts";
 import { BigNumber } from "ethers";
 import { formatTripleDigis } from "helpers/formatters";
@@ -10,6 +11,7 @@ import {
   useContractRead,
   usePrepareContractWrite,
   useContractWrite,
+  useChainId,
 } from "wagmi";
 import { Button } from "./button";
 import { IconButton } from "./icon-button";
@@ -94,8 +96,8 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
   // const votes = 0;
   const pins = 0;
 
-  const contractAddress =
-    process.env.NEXT_PUBLIC_MOONPIN_CONTRACT_ADDRESS ?? "";
+  const chainId = useChainId();
+  const contractAddress = contracts[chainId].moonpinContract;
   const { data: tokenUri, refetch: refetchMoonboards } = useContractRead({
     address: contractAddress as `0x${string}`,
     abi: MoonpinABI.abi,

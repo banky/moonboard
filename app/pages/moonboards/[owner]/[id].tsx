@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "components/button";
 import { Filter, FilterTab } from "components/filter";
 import { IconButton } from "components/icon-button";
-import { Modal } from "components/modal";
 import { PinSingleModal } from "components/pin-single-modal";
+import { contracts } from "constants/contracts";
 import { MoonBoardABI, MoonpinABI } from "contracts";
 import { BigNumber } from "ethers";
 import { formatTripleDigis } from "helpers/formatters";
@@ -12,11 +11,11 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Masonry from "react-masonry-css";
-import { Close } from "svg/close";
 import { Sort } from "svg/sort";
 import { Thumb } from "svg/thumb";
 import {
   useAccount,
+  useChainId,
   useContractRead,
   useContractWrite,
   usePrepareContractWrite,
@@ -26,8 +25,8 @@ export default function Moonboard() {
   const router = useRouter();
   const { owner, id } = router.query;
 
-  const contractAddress =
-    process.env.NEXT_PUBLIC_MOONBOARD_CONTRACT_ADDRESS ?? "";
+  const chainId = useChainId();
+  const contractAddress = contracts[chainId].moonboardContract;
 
   const { data, refetch: refetchMoonboard } = useContractRead({
     address: contractAddress as `0x${string}`,
@@ -121,8 +120,8 @@ type MoonpinCardProps = {
 
 const MoonpinCard = ({ moonpinId, boardOwner, onVote }: MoonpinCardProps) => {
   const { address } = useAccount();
-  const moonpinContract =
-    process.env.NEXT_PUBLIC_MOONPIN_CONTRACT_ADDRESS ?? "";
+  const chainId = useChainId();
+  const moonpinContract = contracts[chainId].moonpinContract;
   const { data: tokenUri, refetch: refetchMoonboards } = useContractRead({
     address: moonpinContract as `0x${string}`,
     abi: MoonpinABI.abi,

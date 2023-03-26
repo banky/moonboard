@@ -269,14 +269,14 @@ const MoonpinCard = ({
         {selected ? (
           <IconButton
             onClick={() => onSelectedChange(!selected)}
-            className="bg-white enabled:px-2 enabled:rounded-full"
+            className="bg-white"
           >
             <Check />
           </IconButton>
         ) : (
           <IconButton
             onClick={() => onSelectedChange(!selected)}
-            className="enabled:bg-primary-brand enabled:px-2 enabled:rounded-full enabled:hover:bg-text-standard"
+            className="enabled:bg-primary-brand enabled:hover:bg-text-standard"
           >
             <PlusCross />
           </IconButton>
