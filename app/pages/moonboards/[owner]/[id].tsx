@@ -108,6 +108,7 @@ export default function Moonboard() {
               key={moonpinId}
               moonpinId={moonpinId}
               onVote={() => refetchMoonboard()}
+              boardOwner={moonboard?.owner ?? ""}
             />
           ))}
         </Masonry>
@@ -118,10 +119,11 @@ export default function Moonboard() {
 
 type MoonpinCardProps = {
   moonpinId: number;
+  boardOwner: string;
   onVote: () => Promise<any>;
 };
 
-const MoonpinCard = ({ moonpinId, onVote }: MoonpinCardProps) => {
+const MoonpinCard = ({ moonpinId, boardOwner, onVote }: MoonpinCardProps) => {
   const { address } = useAccount();
   const moonpinContract =
     process.env.NEXT_PUBLIC_MOONPIN_CONTRACT_ADDRESS ?? "";
@@ -297,6 +299,7 @@ const MoonpinCard = ({ moonpinId, onVote }: MoonpinCardProps) => {
         title={moonpin?.title ?? ""}
         imageUrl={moonpin?.image ?? ""}
         moonpinId={moonpinId}
+        boardOwner={boardOwner}
       />
     </div>
   );

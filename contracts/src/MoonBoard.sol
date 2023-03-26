@@ -8,6 +8,8 @@ contract MoonBoard {
     uint public createBoardFee = 0.01 ether;
     uint public pinFee = 0.0001 ether;
     address immutable deployoor = msg.sender;
+    uint public creatorPinCut = 75;
+    uint public denominator = 100;
 
     struct Board {
         string name;
@@ -116,12 +118,19 @@ contract MoonBoard {
     }
 
     function pinToBoard(
+        address sourceBoardOwner,
         uint sourceMonnpinId,
         uint targetBoardIndex
     ) public payable {
         require(msg.value >= pinFee, "Not enough ETH sent to pin");
-        address owner = msg.sender;
-        Board storage targetBoard = moonboards[owner][targetBoardIndex];
+        address creator = MoonPin(moonpinContract).ownerOf(sourceMonnpinId);
+        uint creatorCut = (pinFee * creatorPinCut) / denominator;
+
+        payable(creator).transfer(creatorCut);
+        payable(sourceBoardOwner).transfer(msg.value - creatorCut);
+
+        address pinner = msg.sender;
+        Board storage targetBoard = moonboards[pinner][targetBoardIndex];
         targetBoard.externalMoonpinIds.push(sourceMonnpinId);
 
         MoonPin(moonpinContract).pin(sourceMonnpinId);
@@ -131,8 +140,8 @@ contract MoonBoard {
         uint sourceMonnpinId,
         uint targetBoardIndex
     ) public {
-        address owner = msg.sender;
-        Board storage targetBoard = moonboards[owner][targetBoardIndex];
+        address pinner = msg.sender;
+        Board storage targetBoard = moonboards[pinner][targetBoardIndex];
         uint[] storage externalMoonpinIds = targetBoard.externalMoonpinIds;
 
         for (uint i = 0; i < externalMoonpinIds.length; i++) {

@@ -22,14 +22,13 @@ describe("MoonBoard", function () {
   }
 
   it("Should create a moonBoard", async () => {
-    const { moonBoard, moonPin, owner, createBoardFee } = await loadFixture(
-      deployMoonboardFixture
-    );
+    const { moonBoard, moonPin, owner, createBoardFee, pinFee } =
+      await loadFixture(deployMoonboardFixture);
 
     await moonBoard.createMoonboard(
       "test moonboard",
       ["ipfs://test-url", "ipfs://test-url2"],
-      { value: createBoardFee }
+      { value: createBoardFee.add(pinFee.mul(2)) }
     );
 
     const board = await moonBoard.getMoonboard(owner.address, 0);
@@ -42,19 +41,19 @@ describe("MoonBoard", function () {
   });
 
   it("gets all moonboards", async () => {
-    const { moonBoard, moonPin, owner, otherAccount, createBoardFee } =
+    const { moonBoard, moonPin, owner, otherAccount, createBoardFee, pinFee } =
       await loadFixture(deployMoonboardFixture);
 
     await moonBoard.createMoonboard(
       "test moonboard",
       ["ipfs://test-url", "ipfs://test-url2"],
-      { value: createBoardFee }
+      { value: createBoardFee.add(pinFee.mul(2)) }
     );
 
     await moonBoard.createMoonboard(
       "test moonboard2",
       ["ipfs://test-url", "ipfs://test-url2"],
-      { value: createBoardFee }
+      { value: createBoardFee.add(pinFee.mul(2)) }
     );
 
     await moonBoard
@@ -62,7 +61,7 @@ describe("MoonBoard", function () {
       .createMoonboard(
         "test moonboard3",
         ["ipfs://test-url", "ipfs://test-url2"],
-        { value: createBoardFee }
+        { value: createBoardFee.add(pinFee.mul(2)) }
       );
 
     const boards = await moonBoard.getAllMoonboards();
@@ -70,19 +69,19 @@ describe("MoonBoard", function () {
   });
 
   it("deletes a moonboard", async () => {
-    const { moonBoard, moonPin, owner, otherAccount, createBoardFee } =
+    const { moonBoard, moonPin, owner, otherAccount, createBoardFee, pinFee } =
       await loadFixture(deployMoonboardFixture);
 
     await moonBoard.createMoonboard(
       "test moonboard",
       ["ipfs://test-url", "ipfs://test-url2"],
-      { value: createBoardFee }
+      { value: createBoardFee.add(pinFee.mul(2)) }
     );
 
     await moonBoard.createMoonboard(
       "test moonboard2",
       ["ipfs://test-url", "ipfs://test-url2"],
-      { value: createBoardFee }
+      { value: createBoardFee.add(pinFee.mul(2)) }
     );
 
     await moonBoard
@@ -90,7 +89,7 @@ describe("MoonBoard", function () {
       .createMoonboard(
         "test moonboard3",
         ["ipfs://test-url", "ipfs://test-url2"],
-        { value: createBoardFee }
+        { value: createBoardFee.add(pinFee.mul(2)) }
       );
 
     await moonBoard.deleteMoonboard(0);
@@ -102,13 +101,13 @@ describe("MoonBoard", function () {
   });
 
   it("votes and pins on a moonboard", async () => {
-    const { moonBoard, moonPin, owner, otherAccount, createBoardFee } =
+    const { moonBoard, moonPin, owner, otherAccount, createBoardFee, pinFee } =
       await loadFixture(deployMoonboardFixture);
 
     await moonBoard.createMoonboard(
       "test moonboard",
       ["ipfs://test-url", "ipfs://test-url2"],
-      { value: createBoardFee }
+      { value: createBoardFee.add(pinFee.mul(2)) }
     );
 
     await moonPin.vote(0);
@@ -133,7 +132,7 @@ describe("MoonBoard", function () {
     await moonBoard.createMoonboard(
       "test moonboard",
       ["ipfs://test-url", "ipfs://test-url2"],
-      { value: createBoardFee }
+      { value: createBoardFee.add(pinFee.mul(2)) }
     );
 
     await moonBoard
@@ -141,10 +140,15 @@ describe("MoonBoard", function () {
       .createMoonboard(
         "test moonboard2",
         ["ipfs://test-url", "ipfs://test-url2"],
-        { value: createBoardFee }
+        { value: createBoardFee.add(pinFee.mul(2)) }
       );
 
-    await moonBoard.connect(otherAccount).pinToBoard(0, 0, { value: pinFee });
+    const prevOwnerBalance = await ethers.provider.getBalance(owner.address);
+    await moonBoard
+      .connect(otherAccount)
+      .pinToBoard(owner.address, 0, 0, { value: pinFee });
+    const newOwnerBalance = await ethers.provider.getBalance(owner.address);
+    expect(prevOwnerBalance).to.equal(newOwnerBalance.sub(pinFee));
 
     const board = await moonBoard.getMoonboard(otherAccount.address, 0);
     const sourceBoard = await moonBoard.getMoonboard(owner.address, 0);

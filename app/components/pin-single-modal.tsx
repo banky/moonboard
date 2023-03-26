@@ -21,6 +21,7 @@ type PinSingleModalProps = {
   title?: string;
   imageUrl: string;
   moonpinId: number;
+  boardOwner: string;
 };
 export const PinSingleModal = ({
   isOpen,
@@ -28,6 +29,7 @@ export const PinSingleModal = ({
   title = "",
   imageUrl,
   moonpinId,
+  boardOwner,
 }: PinSingleModalProps) => {
   const moonboardContract =
     process.env.NEXT_PUBLIC_MOONBOARD_CONTRACT_ADDRESS ?? "";
@@ -56,7 +58,7 @@ export const PinSingleModal = ({
     address: moonboardContract as `0x${string}`,
     abi: MoonBoardABI.abi,
     functionName: "pinToBoard",
-    args: [moonpinId, Number(selectedMoonboard)],
+    args: [boardOwner, moonpinId, Number(selectedMoonboard)],
     enabled: selectedMoonboard !== "",
     overrides: {
       value: pinFee,
