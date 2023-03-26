@@ -6,6 +6,7 @@ import { Modal } from "components/modal";
 import { PinSingleModal } from "components/pin-single-modal";
 import { MoonBoardABI, MoonpinABI } from "contracts";
 import { BigNumber } from "ethers";
+import { formatTripleDigis } from "helpers/formatters";
 import { ipfsToUrl } from "helpers/ipfs";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -40,11 +41,19 @@ export default function Moonboard() {
   const close = () => setShowDialog(false);
 
   const moonboard = data as any;
+  const moonpinIds: any[] = moonboard?.moonpinIds ?? [];
+  const numMoonPins = moonpinIds.length ?? 0;
+  const numPins =
+    (moonboard?.pins as BigNumber | undefined) ?? BigNumber.from(0);
+  const numVotes =
+    (moonboard?.votes as BigNumber | undefined) ?? BigNumber.from(0);
+
+  console.log("moonboard", moonboard);
+
   const title = moonboard?.name ?? "";
-  const moonpinIds = moonboard?.moonpinIds ?? [];
 
   return (
-    <main>
+    <main className="max-w-6xl mx-auto">
       <h1 className="m-12 text-center">{title}</h1>
 
       <div className="flex items-center justify-between">
@@ -71,7 +80,7 @@ export default function Moonboard() {
         <Button onClick={open}>Create Moonboard</Button>
       </div>
 
-      <div className="flex justify-between my-16 mx-auto">
+      <div className="flex justify-between my-10 mx-auto">
         <div className="flex gap-4">
           <h3 className="font-bold">Created by:</h3>
           <p className="inline">{owner}</p>
@@ -79,11 +88,11 @@ export default function Moonboard() {
 
         <div className="flex gap-2">
           <p className="text-outlines">Votes</p>
-          <h3>000</h3>
+          <h3>{formatTripleDigis(numVotes.toNumber())}</h3>
           <p className="text-outlines">Pins</p>
-          <h3>000</h3>
+          <h3>{formatTripleDigis(numPins.toNumber())}</h3>
           <p className="text-outlines">Items</p>
-          <h3>000</h3>
+          <h3>{formatTripleDigis(numMoonPins)}</h3>
         </div>
       </div>
 
@@ -230,8 +239,8 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
         <div className="absolute bottom-2 right-2">
           <IconButton
             onClick={() => setShowPinModal(true)}
-            className="enabled:rounded-full enabled:hover:bg-transparent 
-          enabled:hover:border-none enabled:border-none enabled:hover:scale-110 transition"
+            className="rounded-full hover:bg-transparent 
+            hover:border-none border-none hover:scale-110 transition"
           >
             <Image
               src={"/images/moonboard-icon.png"}
@@ -265,10 +274,10 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
         </div>
         <IconButton
           onClick={onClickVote}
-          className={`enabled:bg-primary-brand enabled:hover:bg-black enabled:px-4 enabled:rounded-full
-          ${hasVoted ? "enabled:bg-red-500" : ""}`}
+          className={`bg-secondary-brand hover:bg-primary-brand hover:bg-black px-4 rounded-full
+          ${true ? "bg-red-300 hover:bg-red-500" : ""}`}
         >
-          <div className={`${hasVoted ? "rotate-180" : ""}`}>
+          <div className={`${true ? "rotate-180" : ""}`}>
             <Thumb />
           </div>
         </IconButton>

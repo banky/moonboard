@@ -27,7 +27,7 @@ export const Button = ({
         enabled:fill-outlines disabled:bg-transparent
         disabled:text-text-low-contrast disabled:border-text-low-contrast
         disabled:fill-text-low-contrast
-        min-w-[150px] 
+        min-w-[150px] transition
         ${className}`}
     >
       {children}

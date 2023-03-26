@@ -2,23 +2,11 @@ import { Button } from "components/button";
 import { Checkbox } from "components/checkbox";
 import { IconButton } from "components/icon-button";
 import { NavigationButton } from "components/navigation-button";
-import { useRouter } from "next/router";
-import { NFTStorage } from "nft.storage";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
-import { Plus } from "svg/plus";
 import Masonry from "react-masonry-css";
 import { Check } from "svg/check";
-import { Close } from "svg/close";
 import { PlusCross } from "svg/plus-cross";
-import { MoonBoardABI, MoonpinABI } from "contracts";
-import {
-  useAccount,
-  usePrepareContractWrite,
-  useContractWrite,
-  useContractRead,
-} from "wagmi";
-import { BigNumber } from "ethers";
 import { CreateMoonboardModal } from "components/create-moonboard-modal";
 
 const fileTypes = ["JPG", "JPEG", "PNG", "GIF"];
@@ -52,7 +40,7 @@ const Upload = ({ files, setFiles, setPageState }: UploadProps) => {
     <main>
       <h1 className="m-12 text-center">Create Moonboard</h1>
 
-      <div className="flex justify-between my-32 max-w-6xl mx-auto">
+      <div className="flex justify-between mb-16 max-w-6xl mx-auto">
         <NavigationButton href="/">Back</NavigationButton>
 
         <Button
@@ -146,10 +134,9 @@ const Publish = ({ files, setPageState }: PublishProps) => {
 
   return (
     <main>
-      <div className="m-12 text-center relative h-20">
+      <div className="m-12 text-center relative h-12">
         <input
-          className="placeholder:font-bold placeholder:text-primary-brand w-full
-         bg-background font-headers absolute top-0 left-0 bottom-0 p-4 outline-none text-5xl
+          className="w-full bg-background font-headers absolute top-0 left-0 bottom-0 outline-none text-5xl h-12
          text-center"
           onFocus={() => setEnteringTitle(true)}
           onBlur={() => setEnteringTitle(false)}
@@ -157,7 +144,7 @@ const Publish = ({ files, setPageState }: PublishProps) => {
           onChange={(e) => setMoonboardName(e.target.value)}
         />
         {showPlaceholder ? (
-          <div className="flex items-center justify-center p-4">
+          <div className="flex items-center justify-center">
             <h1 className="relative pointer-events-none pl-2 pr-1 w-fit">
               MOONBOARD NAME
             </h1>
@@ -166,7 +153,7 @@ const Publish = ({ files, setPageState }: PublishProps) => {
         ) : null}
       </div>
 
-      <div className="flex justify-between my-32 max-w-6xl mx-auto">
+      <div className="flex justify-between mb-16 max-w-6xl mx-auto">
         <Button onClick={() => setPageState("upload")}>Back</Button>
 
         <Button onClick={() => setIsModalOpen(true)}>Publish Moonboard</Button>

@@ -59,7 +59,7 @@ export default function Home() {
   const close = () => setShowDialog(false);
 
   return (
-    <main>
+    <main className="max-w-6xl mx-auto">
       <h1 className="m-12 text-center">Explore Moonboards</h1>
 
       <div className="flex items-center justify-between">
@@ -86,7 +86,7 @@ export default function Home() {
         <Button onClick={open}>Create Moonboard</Button>
       </div>
 
-      <div className="grid sm:grid-cols-1 gap-4 md:grid-cols-3 mt-16">
+      <div className="grid sm:grid-cols-1 gap-4 md:grid-cols-2 mt-16">
         {moonboardsWithIndexes?.map((moonboard: any, key) => {
           return (
             <div key={key} className="">
@@ -123,9 +123,9 @@ export default function Home() {
           <div className="h-0.5 -mx-4 bg-outlines my-4" />
 
           <div className="grid grid-cols-2 gap-4">
-            <ModalOption>
-              <Link href="/create-moonboard">From uploaded images</Link>
-            </ModalOption>
+            <Link href="/create-moonboard">
+              <ModalOption>From uploaded images</ModalOption>
+            </Link>
             <ModalOption disabled>
               From another moonboard (coming soon)
             </ModalOption>
@@ -292,8 +292,8 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
         </div>
         <IconButton
           onClick={onClickVote}
-          className={`enabled:bg-primary-brand enabled:hover:bg-black enabled:px-4 enabled:rounded-full
-          ${hasVoted ? "enabled:bg-red-500" : ""}`}
+          className={`bg-secondary-brand hover:bg-primary-brand hover:bg-black px-4 rounded-full
+          ${hasVoted ? "bg-red-300 hover:bg-red-500" : ""}`}
         >
           <div className={`${hasVoted ? "rotate-180" : ""}`}>
             <Thumb />

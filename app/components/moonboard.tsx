@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { MoonpinABI } from "contracts";
 import { BigNumber } from "ethers";
+import { formatTripleDigis } from "helpers/formatters";
 import { ipfsToUrl } from "helpers/ipfs";
 import Link from "next/link";
 import Masonry from "react-masonry-css";
@@ -42,21 +43,11 @@ export const Moonboard = ({
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <p className="text-white">Votes</p>
-            <h3 className="text-white">
-              {votes.toLocaleString("en-US", {
-                minimumIntegerDigits: 3,
-                useGrouping: false,
-              })}
-            </h3>
+            <h3 className="text-white">{formatTripleDigis(votes)}</h3>
           </div>
           <div className="flex items-center gap-2">
             <p className="text-white">Pins</p>
-            <h3 className="text-white">
-              {pins.toLocaleString("en-US", {
-                minimumIntegerDigits: 3,
-                useGrouping: false,
-              })}
-            </h3>
+            <h3 className="text-white">{formatTripleDigis(pins)}</h3>
           </div>
         </div>
       </div>
@@ -185,8 +176,8 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
         </div>
         <IconButton
           onClick={onClickVote}
-          className={`enabled:bg-primary-brand enabled:hover:bg-black enabled:px-4 enabled:rounded-full
-          ${hasVoted ? "enabled:bg-red-500" : ""}`}
+          className={`bg-secondary-brand hover:bg-primary-brand hover:bg-black px-4 rounded-full
+          ${true ? "bg-red-300 hover:bg-red-500" : ""}`}
         >
           <div className={`${hasVoted ? "rotate-180" : ""}`}>
             <Thumb />

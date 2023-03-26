@@ -36,25 +36,11 @@ export default function Dashboard() {
   };
 
   return (
-    <main>
-      <h1 className="my-8 text-center">Dashboard</h1>
+    <main className="max-w-6xl mx-auto">
+      <h1 className="my-12 text-center">Dashboard</h1>
 
-      <div className="flex items-center justify-between mb-16">
+      <div className="flex justify-between mb-16">
         <div className="flex gap-8">
-          <TabBarItem
-            currentSlot={slot}
-            slot="yourPins"
-            onClick={() => setSlot("yourPins")}
-          >
-            Your Pins
-          </TabBarItem>
-          <TabBarItem
-            currentSlot={slot}
-            slot="moonPins"
-            onClick={() => setSlot("moonPins")}
-          >
-            Moonpins
-          </TabBarItem>
           <TabBarItem
             currentSlot={slot}
             slot="moonBoards"
@@ -71,8 +57,8 @@ export default function Dashboard() {
           </TabBarItem>
         </div>
 
-        <div className="flex gap-4 items-center">
-          <div className="flex items-center gap-4 h-10">
+        <div className="flex gap-4">
+          <div className="flex items-center gap-4 h-fit">
             <Filter>
               <FilterTab filter="pins" isDefault>
                 <div className="flex items-center gap-2">
@@ -120,7 +106,7 @@ const TabBarItem = ({
   const selected = currentSlot === slot;
   return (
     <button
-      className={`bg-none  py-4 ${
+      className={`bg-none  ${
         selected ? "font-bold border-b-4 border-b-primary-brand" : ""
       }`}
       onClick={onClick}
@@ -157,8 +143,7 @@ const MoonboardSlot = () => {
     await refetchMoonboards();
   };
 
-  const moonboards = data as any[];
-  console.log(moonboards);
+  const moonboards = (data as any[]) ?? [];
 
   return (
     <div>
@@ -201,7 +186,7 @@ const MoonBoard = ({
 
   return (
     <div className="border-2 border-outlines rounded-xl overflow-hidden">
-      <div className="flex justify-between bg-black px-8 py-4">
+      <div className="flex justify-between bg-black px-8">
         <Link href={`/moonboards/${address}/${index}`}>
           <h3 className="text-white">{title}</h3>
         </Link>
@@ -345,8 +330,8 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
         </div>
         <IconButton
           onClick={onClickVote}
-          className={`enabled:bg-primary-brand enabled:hover:bg-black enabled:px-4 enabled:rounded-full
-          ${hasVoted ? "enabled:bg-red-500" : ""}`}
+          className={`bg-secondary-brand hover:bg-primary-brand hover:bg-black px-4 rounded-full
+          ${hasVoted ? "bg-red-300 hover:bg-red-500" : ""}`}
         >
           <div className={`${hasVoted ? "rotate-180" : ""}`}>
             <Thumb />
