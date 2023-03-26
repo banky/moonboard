@@ -17,12 +17,12 @@ export const Select = ({
   return (
     <select {...props}>
       {defaultOption ? (
-        <option value="" disabled selected>
+        <option value="" disabled>
           {defaultOption}
         </option>
       ) : null}
-      {options.map((option) => (
-        <option key={option} value={option}>
+      {options.map((option, index) => (
+        <option key={option} value={index.toString()}>
           {option}
         </option>
       ))}

@@ -279,6 +279,7 @@ const MoonpinCard = ({ moonpinId }: MoonpinCardProps) => {
         close={() => setShowPinModal(false)}
         title={moonpin?.title ?? ""}
         imageUrl={moonpin?.image ?? ""}
+        moonpinId={moonpinId}
       />
     </div>
   );

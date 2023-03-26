@@ -51,6 +51,8 @@ export const CreateMoonboardModal = ({
   const pinFee = (pinFeeResult as BigNumber | undefined) ?? BigNumber.from(0);
   const totalPinFee = pinFee.mul(numPins);
 
+  const totalFee = createBoardFee.add(totalPinFee);
+
   const [loadingState, setLoadingState] = useState<"initial" | "ipfs" | "mint">(
     "initial"
   );
@@ -75,7 +77,10 @@ export const CreateMoonboardModal = ({
     args: [address],
   });
 
+  const [successful, setSuccessful] = useState(false);
+
   const onSubmit = async () => {
+    setSuccessful(false);
     setLoadingState("ipfs");
 
     const metadata = await Promise.all(
@@ -96,7 +101,7 @@ export const CreateMoonboardModal = ({
     const sendTransactionResult = await onCreateMoonboard?.({
       recklesslySetUnpreparedArgs: [name, tokenUris],
       recklesslySetUnpreparedOverrides: {
-        value: createBoardFee as BigNumber | undefined,
+        value: totalFee,
       },
     });
     await sendTransactionResult?.wait();
@@ -104,6 +109,7 @@ export const CreateMoonboardModal = ({
     const moonboards = await refetchMoonboards();
 
     setLoadingState("initial");
+    setSuccessful(true);
   };
 
   return (
@@ -168,12 +174,15 @@ export const CreateMoonboardModal = ({
 
             <div className="flex justify-between mt-4">
               <div />
-              <Button
-                onClick={onSubmit}
-                disabled={!["initial"].includes(loadingState)}
-              >
-                {loadingStateString}
-              </Button>
+              <div>
+                <Button
+                  onClick={onSubmit}
+                  disabled={!["initial"].includes(loadingState)}
+                >
+                  {loadingStateString}
+                </Button>
+                {successful && <p className="text-right mt-2">Success!</p>}
+              </div>
             </div>
           </div>
         </div>

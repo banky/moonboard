@@ -43,7 +43,6 @@ type UploadProps = {
 const Upload = ({ files, setFiles, setPageState }: UploadProps) => {
   const [myPictures, setMyPictures] = useState(false);
   const [communityGuidelines, setCommunityGuidelines] = useState(false);
-  const submitEnabled = myPictures && communityGuidelines && files.length > 0;
 
   const handleChange = (files: FileList) => {
     setFiles(Array.from(files));
@@ -60,7 +59,6 @@ const Upload = ({ files, setFiles, setPageState }: UploadProps) => {
           onClick={() => {
             setPageState("publish");
           }}
-          disabled={!submitEnabled}
         >
           Continue
         </Button>

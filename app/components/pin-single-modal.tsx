@@ -4,35 +4,42 @@ import { Modal } from "./modal";
 import Image from "next/image";
 import { Button } from "./button";
 import { Select } from "./select";
-import { useAccount, useContractRead } from "wagmi";
+import {
+  useAccount,
+  useContractRead,
+  useContractWrite,
+  usePrepareContractWrite,
+} from "wagmi";
 import { MoonBoardABI } from "contracts";
 import { useState } from "react";
 import { NavigationButton } from "./navigation-button";
+import { BigNumber } from "ethers";
 
 type PinSingleModalProps = {
   isOpen: boolean;
   close: () => void;
   title?: string;
   imageUrl: string;
+  moonpinId: number;
 };
 export const PinSingleModal = ({
   isOpen,
   close,
   title = "",
   imageUrl,
+  moonpinId,
 }: PinSingleModalProps) => {
   const moonboardContract =
     process.env.NEXT_PUBLIC_MOONBOARD_CONTRACT_ADDRESS ?? "";
   const { address } = useAccount();
 
-  const { data: pinFee, refetch: refetchFee } = useContractRead({
+  const { data: pinFeeResult, refetch: refetchFee } = useContractRead({
     address: moonboardContract as `0x${string}`,
     abi: MoonBoardABI.abi,
     functionName: "pinFee",
     args: [],
   });
-
-  console.log("pinFee", pinFee);
+  const pinFee = (pinFeeResult as BigNumber | undefined) ?? BigNumber.from(0);
 
   const { data, refetch: refetchMoonboards } = useContractRead({
     address: moonboardContract as `0x${string}`,
@@ -45,9 +52,23 @@ export const PinSingleModal = ({
   moonboardNames.push("Create new moonboard...");
   const [selectedMoonboard, setSelectedMoonboard] = useState("");
 
+  const { config: pinConfig } = usePrepareContractWrite({
+    address: moonboardContract as `0x${string}`,
+    abi: MoonBoardABI.abi,
+    functionName: "pinToBoard",
+    args: [moonpinId, Number(selectedMoonboard)],
+    enabled: selectedMoonboard !== "",
+    overrides: {
+      value: pinFee,
+    },
+  });
+  const { writeAsync: onPinToBoard } = useContractWrite(pinConfig);
+
   const [stage, setStage] = useState<"pin" | "payment" | "complete">("pin");
 
   const onClickPay = async () => {
+    const sendTransactionResult = await onPinToBoard?.();
+    await sendTransactionResult?.wait();
     setStage("complete");
   };
 
