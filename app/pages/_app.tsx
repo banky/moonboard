@@ -5,15 +5,10 @@ import { ConnectKitProvider, getDefaultClient } from "connectkit";
 import { AppProps } from "next/app";
 import dynamic from "next/dynamic";
 import { Header } from "components/header";
-import {
-  hardhat,
-  polygonZkEvmTestnet,
-  optimismGoerli,
-  gnosisChiado,
-} from "wagmi/chains";
+import { hardhat, optimismGoerli, gnosisChiado } from "wagmi/chains";
 import { Montserrat } from "next/font/google";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { scrollAlpha } from "constants/custom-chains";
+import { scrollAlpha, polygonZkEvmTestnet } from "constants/custom-chains";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 
