@@ -21,6 +21,7 @@ import { formatTripleDigis } from "helpers/formatters";
 import { CreateMoonboardTypeModal } from "components/create-moonboard-type-modal";
 import { contracts } from "constants/contracts";
 import Head from "next/head";
+import { Footer } from "components/footer";
 
 export default function Home() {
   const chainId = useChainId();
@@ -108,6 +109,7 @@ export default function Home() {
 
         <CreateMoonboardTypeModal showDialog={showDialog} close={close} />
       </main>
+      <Footer />
     </>
   );
 }
@@ -261,36 +263,38 @@ const MoonpinCard = ({ moonpinId, onVote }: MoonpinCardProps) => {
   };
 
   return (
-    <div className="border-2 border-outlines rounded-2xl relative overflow-hidden mb-4">
-      <div>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={moonpin?.image} alt="" />
-      </div>
-      <div className="flex justify-between px-4 py-2">
-        <div className="flex gap-4">
-          <div className="flex flex-col">
-            <p className="">Votes</p>
-            <h3 className="">{formatTripleDigis(voteCount)}</h3>
-          </div>
-          <div className="flex flex-col">
-            <p className="">Pins</p>
-            <h3 className="">{formatTripleDigis(pins)}</h3>
-          </div>
+    <>
+      <div className="border-2 border-outlines rounded-2xl relative overflow-hidden mb-4">
+        <div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={moonpin?.image} alt="" />
         </div>
-        <IconButton
-          onClick={onClickVote}
-          className={`hover:bg-black px-4 rounded-full 
+        <div className="flex justify-between px-4 py-2">
+          <div className="flex gap-4">
+            <div className="flex flex-col">
+              <p className="">Votes</p>
+              <h3 className="">{formatTripleDigis(voteCount)}</h3>
+            </div>
+            <div className="flex flex-col">
+              <p className="">Pins</p>
+              <h3 className="">{formatTripleDigis(pins)}</h3>
+            </div>
+          </div>
+          <IconButton
+            onClick={onClickVote}
+            className={`hover:bg-black px-4 rounded-full 
           ${
             hasVoted
               ? "bg-red-300 enabled:hover:bg-red-500"
               : "bg-secondary-brand hover:bg-primary-brand"
           }`}
-        >
-          <div className={`${hasVoted ? "rotate-180" : ""}`}>
-            <Thumb />
-          </div>
-        </IconButton>
+          >
+            <div className={`${hasVoted ? "rotate-180" : ""}`}>
+              <Thumb />
+            </div>
+          </IconButton>
+        </div>
       </div>
-    </div>
+    </>
   );
 };

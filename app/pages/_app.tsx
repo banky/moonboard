@@ -9,6 +9,7 @@ import { hardhat, optimismGoerli, gnosisChiado } from "wagmi/chains";
 import { Montserrat } from "next/font/google";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { scrollAlpha, polygonZkEvmTestnet } from "constants/custom-chains";
+import { Footer } from "components/footer";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 
