@@ -203,7 +203,7 @@ const MoonBoard = ({
     <div className="border-2 border-outlines rounded-xl overflow-hidden">
       <div className="flex justify-between bg-black px-8">
         <Link href={`/moonboards/${address}/${index}`}>
-          <h3 className="text-white">{title}</h3>
+          <h3 className="text-white py-2">{title}</h3>
         </Link>
 
         <div className="flex items-center gap-4">

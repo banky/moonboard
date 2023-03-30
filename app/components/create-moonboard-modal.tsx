@@ -15,6 +15,7 @@ import { useState } from "react";
 import { MoonPin } from "pages/create-moonboard";
 import { NFTStorage } from "nft.storage";
 import { contracts } from "constants/contracts";
+import { NavigationButton } from "./navigation-button";
 
 const nftStorageClient = new NFTStorage({
   token: process.env.NEXT_PUBLIC_NFT_STORAGE_TOKEN ?? "",
@@ -181,12 +182,18 @@ export const CreateMoonboardModal = ({
             <div className="flex justify-between mt-4">
               <div />
               <div>
-                <Button
-                  onClick={onSubmit}
-                  disabled={!["initial"].includes(loadingState)}
-                >
-                  {loadingStateString}
-                </Button>
+                {!successful ? (
+                  <Button
+                    onClick={onSubmit}
+                    disabled={!["initial"].includes(loadingState)}
+                  >
+                    {loadingStateString}
+                  </Button>
+                ) : (
+                  <NavigationButton href="/dashboard">
+                    Dashboard
+                  </NavigationButton>
+                )}
                 {successful && <p className="text-right mt-2">Success!</p>}
               </div>
             </div>

@@ -37,6 +37,10 @@ const Upload = ({ files, setFiles, setPageState }: UploadProps) => {
     setFiles(Array.from(files));
   };
 
+  const canContinue =
+    files.length === 0 ||
+    (files.length > 0 && myPictures && communityGuidelines);
+
   return (
     <>
       <Head>
@@ -49,6 +53,7 @@ const Upload = ({ files, setFiles, setPageState }: UploadProps) => {
           <NavigationButton href="/">Back</NavigationButton>
 
           <Button
+            disabled={!canContinue}
             onClick={() => {
               setPageState("publish");
             }}
